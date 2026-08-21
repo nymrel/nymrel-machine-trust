@@ -18,7 +18,7 @@
   ],
   "scripts": {
     "build": "tsc",
-    "test": "node --test test/*.test.js",
+    "test": "node test/runner.js",
     "test:runner": "node test/runner.js",
     "lint": "tsc --noEmit",
     "prepublishOnly": "npm run build && npm run test"
