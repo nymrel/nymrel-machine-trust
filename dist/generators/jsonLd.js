@@ -77,7 +77,7 @@ export function generateJsonLd(config) {
     // 3. Product / SoftwareApplication Entity
     if (config.product) {
         const prod = config.product;
-        const isSoftware = !prod.softwareApplication;
+        const isSoftware = Boolean(prod.softwareApplication);
         const productType = isSoftware ? 'SoftwareApplication' : 'Product';
         const productEntity = {
             '@type': productType,
