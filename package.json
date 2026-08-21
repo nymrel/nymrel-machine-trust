@@ -21,7 +21,7 @@
     "test": "node test/runner.js",
     "test:runner": "node test/runner.js",
     "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm run test"
+    "prepublishOnly": "npm run build && npm test"
   },
   "keywords": [
     "seo",
@@ -45,5 +45,8 @@
   "devDependencies": {
     "@types/node": "^20.11.0",
     "typescript": "^5.3.3"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
