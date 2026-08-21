@@ -12,7 +12,7 @@ The Nymrel engineering team takes the security of autonomous software systems an
 
 If you discover a security vulnerability in `@nymrel/machine-trust`, please report it directly via email to:
 
-**`contact@jalenbuilds.com`**
+**`contact@nymrel.com`**
 
 Please include:
 - A description of the vulnerability and attack vector.

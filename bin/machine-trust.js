@@ -96,7 +96,7 @@ async function main() {
         url: 'https://example.nymrel.com',
         logo: 'https://example.nymrel.com/logo.png',
         description: 'Autonomous high-performance web platform built under the Nymrel umbrella.',
-        email: 'contact@jalenbuilds.com',
+        email: 'contact@nymrel.com',
         parentOrganization: {
           name: 'Nymrel',
           legalName: 'Nymrel (a JalenBuilds LLC company)',

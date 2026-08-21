@@ -97,7 +97,7 @@ const config = {
     legalName: 'Nymrel Service (a JalenBuilds LLC company)',
     url: 'https://service.nymrel.com',
     description: 'Autonomous cloud workflow engine.',
-    email: 'contact@jalenbuilds.com',
+    email: 'contact@nymrel.com',
     parentOrganization: {
       name: 'Nymrel',
       legalName: 'Nymrel (a JalenBuilds LLC company)',
@@ -264,5 +264,5 @@ When running `machine-trust audit`, your site is scored against the Nymrel 100-p
 ## Governance & License
 
 - **Entity Owner:** Nymrel / JalenBuilds LLC
-- **Contact:** `contact@jalenbuilds.com`
+- **Contact:** `contact@nymrel.com`
 - **License:** MIT (see [LICENSE](./LICENSE))
