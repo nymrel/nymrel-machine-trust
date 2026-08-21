@@ -32,7 +32,7 @@ describe('LLMs.txt & LLMs-Full.txt Generator', () => {
     optionalLinks: [
       {
         title: 'Parent Entity',
-        url: 'https://jalenbuilds.com',
+        url: 'https://nymrel.com',
         description: 'JalenBuilds LLC venture studio overview.',
       },
     ],

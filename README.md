@@ -105,7 +105,7 @@ const config = {
       parentOrganization: {
         name: 'JalenBuilds LLC',
         legalName: 'JalenBuilds LLC',
-        url: 'https://jalenbuilds.com'
+        url: 'https://nymrel.com'
       }
     }
   },

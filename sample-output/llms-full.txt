@@ -14,7 +14,7 @@ Primary TypeScript generators and validators for machine trust.
 ## Optional
 
 - [Nymrel Umbrella](https://nymrel.com): Autonomous software systems portfolio.
-- [JalenBuilds LLC](https://jalenbuilds.com): Parent venture studio holding company.
+- [JalenBuilds LLC](https://nymrel.com): Parent venture studio holding company.
 
 ---
 
