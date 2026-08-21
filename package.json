@@ -1,0 +1,49 @@
+{
+  "name": "@nymrel/machine-trust",
+  "version": "1.0.0",
+  "description": "Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications",
+  "main": "./dist/index.js",
+  "module": "./dist/index.mjs",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "machine-trust": "./bin/machine-trust.js"
+  },
+  "files": [
+    "dist",
+    "bin",
+    "src",
+    "README.md",
+    "LICENSE",
+    "llms.txt"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "node --test test/*.test.js",
+    "test:runner": "node test/runner.js",
+    "lint": "tsc --noEmit",
+    "prepublishOnly": "npm run build && npm run test"
+  },
+  "keywords": [
+    "seo",
+    "machine-trust",
+    "dual-audience",
+    "json-ld",
+    "schema-org",
+    "llms-txt",
+    "robots-txt",
+    "ai-search",
+    "oai-searchbot",
+    "answer-first",
+    "nymrel",
+    "jalenbuilds"
+  ],
+  "author": "Nymrel / JalenBuilds LLC <contact@jalenbuilds.com>",
+  "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "typescript": "^5.3.3"
+  }
+}

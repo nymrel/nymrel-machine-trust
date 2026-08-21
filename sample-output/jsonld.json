@@ -1,0 +1,110 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://machine-trust.nymrel.com#organization",
+      "name": "Nymrel Machine Trust",
+      "url": "https://machine-trust.nymrel.com",
+      "description": "Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications.",
+      "legalName": "Nymrel Machine Trust (a JalenBuilds LLC product)",
+      "logo": "https://machine-trust.nymrel.com/logo.png",
+      "email": "contact@jalenbuilds.com",
+      "sameAs": [
+        "https://github.com/nymrel/machine-trust"
+      ],
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Nymrel",
+        "url": "https://nymrel.com",
+        "legalName": "Nymrel (a JalenBuilds LLC company)",
+        "description": "Autonomous software systems and digital services umbrella.",
+        "parentOrganization": {
+          "@type": "Organization",
+          "name": "JalenBuilds LLC",
+          "url": "https://jalenbuilds.com",
+          "legalName": "JalenBuilds LLC",
+          "description": "Parent holding company and technical venture studio."
+        }
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://machine-trust.nymrel.com#website",
+      "url": "https://machine-trust.nymrel.com",
+      "name": "Nymrel Machine Trust",
+      "description": "Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications.",
+      "publisher": {
+        "@id": "https://machine-trust.nymrel.com#organization"
+      }
+    },
+    {
+      "@type": "SoftwareApplication",
+      "@id": "https://machine-trust.nymrel.com#product",
+      "name": "@nymrel/machine-trust",
+      "description": "Enterprise TypeScript library and CLI that generates, validates, and audits Dual-Audience machine trust and AI search discoverability.",
+      "brand": {
+        "@type": "Brand",
+        "name": "Nymrel"
+      },
+      "url": "https://machine-trust.nymrel.com",
+      "category": "DeveloperApplication",
+      "applicationCategory": "DeveloperApplication",
+      "operatingSystem": "Cross-platform (Node.js >= 18)",
+      "featureList": "Schema.org JSON-LD parent entity graphs, Standard /llms.txt and /llms-full.txt generation, AI Search crawler robots.txt policies (OAI-SearchBot, PerplexityBot), 40-60 word Answer-First executive summary blocks, Structured data vs rendered DOM parity validation, 100-point composite Machine Trust Scorecard",
+      "offers": {
+        "@type": "Offer",
+        "price": "0.00",
+        "priceCurrency": "USD",
+        "availability": "https://schema.org/InStock",
+        "url": "https://machine-trust.nymrel.com/pricing"
+      }
+    },
+    {
+      "@type": "FAQPage",
+      "@id": "https://machine-trust.nymrel.com#faq",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "What is the Dual-Audience Rule?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "Every modern web application must deliver visually stunning UX for human visitors AND verifiable machine trust (JSON-LD entity graphs, llms.txt, AI search crawlers) for autonomous AI purchasing agents."
+          }
+        },
+        {
+          "@type": "Question",
+          "name": "Why is parentOrganization hierarchy essential in Schema.org?",
+          "acceptedAnswer": {
+            "@type": "Answer",
+            "text": "AI reasoning engines and autonomous purchasing agents verify company legitimacy and trust by traversing the cryptographic and schema entity graph back to the parent legal entity (JalenBuilds LLC)."
+          }
+        }
+      ]
+    },
+    {
+      "@type": "BreadcrumbList",
+      "@id": "https://machine-trust.nymrel.com#breadcrumbs",
+      "itemListElement": [
+        {
+          "@type": "ListItem",
+          "position": 1,
+          "name": "Home",
+          "item": "https://machine-trust.nymrel.com"
+        },
+        {
+          "@type": "ListItem",
+          "position": 2,
+          "name": "Documentation",
+          "item": "https://machine-trust.nymrel.com/docs"
+        },
+        {
+          "@type": "ListItem",
+          "position": 3,
+          "name": "CLI Guide",
+          "item": "https://machine-trust.nymrel.com/docs/cli"
+        }
+      ]
+    }
+  ]
+}
