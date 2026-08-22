@@ -253,3 +253,156 @@ export function validateJsonLdStructure(jsonLd: any): {
     warnings,
   };
 }
+
+/**
+ * Canonical Nymrel lineage names for verifiable machine trust:
+ * the studio brand (intermediate) and the legal parent company (root).
+ */
+export const CANONICAL_INTERMEDIATE_ORG_NAME = 'Nymrel';
+export const CANONICAL_ROOT_ORG_NAME = 'JalenBuilds LLC';
+
+/** A single structured finding from lineage validation */
+export interface LineageIssue {
+  /** Stable machine-readable code, safe to gate on in CI */
+  code: string;
+  severity: 'error' | 'warning';
+  message: string;
+}
+
+/** Deterministic result of canonical lineage validation */
+export interface LineageValidationResult {
+  /** True only when the canonical Nymrel -> JalenBuilds LLC chain is intact */
+  valid: boolean;
+  errors: string[];
+  warnings: string[];
+  issues: LineageIssue[];
+}
+
+function finalizeLineageResult(issues: LineageIssue[]): LineageValidationResult {
+  return {
+    valid: !issues.some((issue) => issue.severity === 'error'),
+    errors: issues.filter((issue) => issue.severity === 'error').map((issue) => issue.message),
+    warnings: issues.filter((issue) => issue.severity === 'warning').map((issue) => issue.message),
+    issues,
+  };
+}
+
+function isOrgNodeObject(value: any): boolean {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function trimmedOrgName(node: any): string | undefined {
+  return typeof node?.name === 'string' ? node.name.trim() : undefined;
+}
+
+/**
+ * Opt-in validator: checks that an existing JSON-LD graph carries the canonical
+ * Nymrel -> JalenBuilds LLC parentOrganization lineage. Read-only — it never
+ * rewrites the graph or asserts anything about deployments.
+ *
+ * Accepts either a full `{ @context, @graph }` document or a bare Organization
+ * node. When multiple top-level Organization entities exist, the primary one is
+ * selected deterministically (`@id` ending in '#organization', else first in
+ * graph order). Names are matched exactly (whitespace-trimmed,
+ * case-sensitive) against the canonical constants.
+ *
+ * Missing or incorrect intermediate ('Nymrel') and root ('JalenBuilds LLC')
+ * organization nodes are errors; nesting beyond the canonical root is a
+ * non-blocking warning. Generic structural validation remains available via
+ * `validateJsonLdStructure`.
+ */
+export function validateNymrelLineage(jsonLd: any): LineageValidationResult {
+  const issues: LineageIssue[] = [];
+  const add = (code: string, severity: 'error' | 'warning', message: string): void => {
+    issues.push({ code, severity, message });
+  };
+
+  if (!isOrgNodeObject(jsonLd)) {
+    add('LINEAGE_UNVERIFIABLE', 'error', 'Input must be a JSON-LD object');
+    return finalizeLineageResult(issues);
+  }
+
+  let org: any;
+  if (Array.isArray(jsonLd['@graph'])) {
+    const orgs = jsonLd['@graph'].filter(
+      (item: any) => isOrgNodeObject(item) && item['@type'] === 'Organization'
+    );
+    org =
+      orgs.find(
+        (item: any) => typeof item['@id'] === 'string' && item['@id'].endsWith('#organization')
+      ) || orgs[0];
+    if (!org) {
+      add('MISSING_ORGANIZATION', 'error', "No 'Organization' entity found in @graph");
+      return finalizeLineageResult(issues);
+    }
+  } else if (jsonLd['@type'] === 'Organization') {
+    org = jsonLd;
+  } else {
+    add(
+      'LINEAGE_UNVERIFIABLE',
+      'error',
+      'Input must be a JSON-LD document with an @graph array, or a bare Organization node'
+    );
+    return finalizeLineageResult(issues);
+  }
+
+  // Intermediate node: Nymrel
+  const intermediate = org.parentOrganization;
+  if (intermediate === undefined || intermediate === null) {
+    add(
+      'MISSING_PARENT_ORGANIZATION',
+      'error',
+      `Organization is missing 'parentOrganization' (expected intermediate '${CANONICAL_INTERMEDIATE_ORG_NAME}')`
+    );
+    return finalizeLineageResult(issues);
+  }
+  if (!isOrgNodeObject(intermediate)) {
+    add('MALFORMED_PARENT_NODE', 'error', "'parentOrganization' must be an Organization object");
+    return finalizeLineageResult(issues);
+  }
+  const intermediateName = trimmedOrgName(intermediate);
+  if (intermediateName !== CANONICAL_INTERMEDIATE_ORG_NAME) {
+    add(
+      'INCORRECT_INTERMEDIATE_NAME',
+      'error',
+      `Intermediate parentOrganization name ${JSON.stringify(intermediate.name)} does not match canonical '${CANONICAL_INTERMEDIATE_ORG_NAME}'`
+    );
+  }
+
+  // Root node: JalenBuilds LLC
+  const root = intermediate.parentOrganization;
+  if (root === undefined || root === null) {
+    add(
+      'MISSING_ROOT_ORGANIZATION',
+      'error',
+      `Intermediate '${CANONICAL_INTERMEDIATE_ORG_NAME}' is missing its own 'parentOrganization' (expected root '${CANONICAL_ROOT_ORG_NAME}')`
+    );
+    return finalizeLineageResult(issues);
+  }
+  if (!isOrgNodeObject(root)) {
+    add(
+      'MALFORMED_PARENT_NODE',
+      'error',
+      "parentOrganization.parentOrganization must be an Organization object"
+    );
+    return finalizeLineageResult(issues);
+  }
+  const rootName = trimmedOrgName(root);
+  if (rootName !== CANONICAL_ROOT_ORG_NAME) {
+    add(
+      'INCORRECT_ROOT_NAME',
+      'error',
+      `Root parentOrganization name ${JSON.stringify(root.name)} does not match canonical '${CANONICAL_ROOT_ORG_NAME}'`
+    );
+  }
+
+  if (root.parentOrganization !== undefined && root.parentOrganization !== null) {
+    add(
+      'UNEXPECTED_DEEPER_NESTING',
+      'warning',
+      `Canonical lineage ends at '${CANONICAL_ROOT_ORG_NAME}'; deeper parentOrganization nesting found`
+    );
+  }
+
+  return finalizeLineageResult(issues);
+}

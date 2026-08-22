@@ -1,6 +1,12 @@
 import { test, describe } from 'node:test';
 import assert from 'node:assert';
-import { generateJsonLd, validateJsonLdStructure } from '../dist/generators/jsonLd.js';
+import {
+  generateJsonLd,
+  validateJsonLdStructure,
+  validateNymrelLineage,
+  CANONICAL_INTERMEDIATE_ORG_NAME,
+  CANONICAL_ROOT_ORG_NAME,
+} from '../dist/generators/jsonLd.js';
 
 describe('JSON-LD & Schema.org Graph Generator', () => {
   const sampleConfig = {
@@ -94,5 +100,148 @@ describe('JSON-LD & Schema.org Graph Generator', () => {
     const validation = validateJsonLdStructure(jsonLd);
     assert.strictEqual(validation.valid, true);
     assert.strictEqual(validation.errors.length, 0);
+  });
+});
+
+describe('Canonical Nymrel lineage validation', () => {
+  const canonicalConfig = {
+    entity: {
+      name: 'Example App',
+      url: 'https://example.com',
+      description: 'Example application used for lineage validation.',
+      parentOrganization: {
+        name: 'Nymrel',
+        url: 'https://nymrel.com',
+        parentOrganization: {
+          name: 'JalenBuilds LLC',
+          url: 'https://nymrel.com',
+        },
+      },
+    },
+  };
+
+  const canonicalChain = {
+    name: 'Nymrel',
+    url: 'https://nymrel.com',
+    parentOrganization: {
+      name: 'JalenBuilds LLC',
+      legalName: 'JalenBuilds LLC',
+      url: 'https://nymrel.com',
+    },
+  };
+
+  const graphWithLineage = (parentOrganization) => ({
+    '@context': 'https://schema.org',
+    '@graph': [
+      {
+        '@type': 'Organization',
+        '@id': 'https://example.com/#organization',
+        name: 'Example App',
+        url: 'https://example.com',
+        ...(parentOrganization ? { parentOrganization } : {}),
+      },
+    ],
+  });
+
+  const codesOf = (result) => result.issues.map((issue) => issue.code);
+
+  test('accepts a generated canonical graph with zero issues', () => {
+    const result = validateNymrelLineage(generateJsonLd(canonicalConfig));
+    assert.strictEqual(result.valid, true);
+    assert.strictEqual(result.errors.length, 0);
+    assert.strictEqual(result.warnings.length, 0);
+    assert.deepStrictEqual(result.issues, []);
+  });
+
+  test('accepts the default injected hierarchy when config omits parentOrganization', () => {
+    const config = {
+      ...canonicalConfig,
+      entity: { ...canonicalConfig.entity, parentOrganization: undefined },
+    };
+    const result = validateNymrelLineage(generateJsonLd(config));
+    assert.strictEqual(result.valid, true);
+    assert.strictEqual(result.errors.length, 0);
+  });
+
+  test('accepts a bare Organization node carrying the canonical chain', () => {
+    const orgNode = {
+      '@type': 'Organization',
+      name: 'Example App',
+      url: 'https://example.com',
+      parentOrganization: JSON.parse(JSON.stringify(canonicalChain)),
+    };
+    const result = validateNymrelLineage(orgNode);
+    assert.strictEqual(result.valid, true);
+    assert.strictEqual(result.issues.length, 0);
+  });
+
+  test('exposes stable machine-readable issue shape and canonical names', () => {
+    const result = validateNymrelLineage(graphWithLineage({ name: 'Acme Corp' }));
+    for (const issue of result.issues) {
+      assert.strictEqual(typeof issue.code, 'string');
+      assert.ok(issue.severity === 'error' || issue.severity === 'warning');
+      assert.strictEqual(typeof issue.message, 'string');
+    }
+    assert.strictEqual(CANONICAL_INTERMEDIATE_ORG_NAME, 'Nymrel');
+    assert.strictEqual(CANONICAL_ROOT_ORG_NAME, 'JalenBuilds LLC');
+  });
+
+  test('rejects a graph with missing lineage entirely', () => {
+    const result = validateNymrelLineage(graphWithLineage(undefined));
+    assert.strictEqual(result.valid, false);
+    assert.ok(codesOf(result).includes('MISSING_PARENT_ORGANIZATION'));
+  });
+
+  test('rejects an incorrect intermediate organization name', () => {
+    const result = validateNymrelLineage(
+      graphWithLineage({
+        name: 'Acme Corp',
+        url: 'https://acme.example',
+        parentOrganization: { name: 'JalenBuilds LLC', url: 'https://nymrel.com' },
+      })
+    );
+    assert.strictEqual(result.valid, false);
+    assert.ok(codesOf(result).includes('INCORRECT_INTERMEDIATE_NAME'));
+  });
+
+  test('rejects a missing root organization node', () => {
+    const result = validateNymrelLineage(
+      graphWithLineage({ name: 'Nymrel', url: 'https://nymrel.com' })
+    );
+    assert.strictEqual(result.valid, false);
+    assert.ok(codesOf(result).includes('MISSING_ROOT_ORGANIZATION'));
+  });
+
+  test('rejects an incorrect root organization name', () => {
+    const result = validateNymrelLineage(
+      graphWithLineage({
+        name: 'Nymrel',
+        url: 'https://nymrel.com',
+        parentOrganization: { name: 'JalenBuilds Inc', url: 'https://nymrel.com' },
+      })
+    );
+    assert.strictEqual(result.valid, false);
+    assert.ok(codesOf(result).includes('INCORRECT_ROOT_NAME'));
+  });
+
+  test('warns without failing on nesting beyond the canonical root', () => {
+    const chain = JSON.parse(JSON.stringify(canonicalChain));
+    chain.parentOrganization.parentOrganization = { name: 'Beyond Root' };
+    const result = validateNymrelLineage(graphWithLineage(chain));
+    assert.strictEqual(result.valid, true);
+    assert.strictEqual(result.warnings.length, 1);
+    assert.deepStrictEqual(codesOf(result), ['UNEXPECTED_DEEPER_NESTING']);
+  });
+
+  test('reports unverifiable input deterministically across runs', () => {
+    const first = validateNymrelLineage(null);
+    const second = validateNymrelLineage(null);
+    assert.strictEqual(first.valid, false);
+    assert.deepStrictEqual(codesOf(first), ['LINEAGE_UNVERIFIABLE']);
+    assert.deepStrictEqual(first, second);
+
+    const noOrg = validateNymrelLineage({ '@context': 'https://schema.org', '@graph': [] });
+    assert.strictEqual(noOrg.valid, false);
+    assert.ok(codesOf(noOrg).includes('MISSING_ORGANIZATION'));
   });
 });
