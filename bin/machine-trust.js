@@ -7,7 +7,7 @@
 
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -24,7 +24,9 @@ async function loadEngine() {
     process.exit(1);
   }
 
-  return await import(distPath);
+  // Dynamic ESM import requires a file:// URL — bare absolute paths crash on
+  // Windows (ERR_UNSUPPORTED_ESM_URL_SCHEME: protocol 'c:' unsupported).
+  return await import(pathToFileURL(distPath).href);
 }
 
 function printUsage() {

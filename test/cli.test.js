@@ -65,4 +65,54 @@ describe('CLI smoke tests', () => {
     // Fail-closed: no partial output leaked into the working directory.
     assert.deepStrictEqual(fs.readdirSync(sandbox), ['pkg']);
   });
+
+  test('audit loads the compiled engine and scores a config end-to-end', (t) => {
+    const sandbox = makeTempCwd(t);
+
+    // Self-contained fixture: exercises the dynamic import of dist/index.js,
+    // which must work on Windows where bare absolute paths are invalid ESM
+    // specifiers (ERR_UNSUPPORTED_ESM_URL_SCHEME).
+    const html = `<!DOCTYPE html>
+<html lang="en">
+<head><title>Test Shop</title></head>
+<body>
+  <h1>Test Widget</h1>
+  <p>Test Widget is a dependable widget for demanding households.</p>
+  <p class="price">$19.00 - In stock</p>
+  <footer><p>Test Shop - hello@testshop.example</p></footer>
+</body>
+</html>`;
+    const config = {
+      entity: {
+        name: 'Test Shop',
+        url: 'https://testshop.example',
+        description: 'A dependable shop for demanding households.',
+        email: 'hello@testshop.example',
+      },
+      product: {
+        name: 'Test Widget',
+        description: 'The Test Widget is a dependable widget for demanding households.',
+        brand: 'Test Shop',
+        offers: [{ price: '19.00', priceCurrency: 'USD', availability: 'InStock' }],
+      },
+      robotsTxt: { posture: 'allow_ai_search_disallow_training' },
+    };
+    fs.writeFileSync(path.join(sandbox, 'index.html'), html, 'utf8');
+    fs.writeFileSync(path.join(sandbox, 'machine-trust.config.json'), JSON.stringify(config), 'utf8');
+
+    const result = spawnSync(process.execPath, [
+      binPath,
+      'audit',
+      '--config', './machine-trust.config.json',
+      '--html', './index.html',
+      '--report', './MACHINE_TRUST_SCORECARD.md',
+    ], { cwd: sandbox, encoding: 'utf8' });
+
+    assert.strictEqual(result.error, undefined);
+    assert.strictEqual(result.status, 0);
+    assert.match(result.stdout, /Overall Score:/);
+    assert.match(result.stdout, /0 Failed/);
+    const report = fs.readFileSync(path.join(sandbox, 'MACHINE_TRUST_SCORECARD.md'), 'utf8');
+    assert.match(report, /Audit Score:/);
+  });
 });
