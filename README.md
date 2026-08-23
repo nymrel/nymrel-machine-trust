@@ -24,8 +24,9 @@ node ./bin/machine-trust.js audit --config ./machine-trust.config.json --html ./
 ```
 
 The audit prints a scorecard in your terminal and writes
-`MACHINE_TRUST_SCORECARD.md` next to your config. Exit code is `0` when every
-check passes and `1` otherwise, so it drops straight into CI.
+`MACHINE_TRUST_SCORECARD.md` next to your config. Exit code is `1` when any
+check fails and `0` when checks only pass or warn, so a strict CI gate is
+`machine-trust audit` with warnings treated as non-blocking by default.
 
 A minimal developer example lives in [`examples/minimal-site`](./examples/minimal-site).
 The buyer-readable, deterministic specimen is
@@ -60,15 +61,21 @@ Requires Node.js >= 18.
 ## CLI
 
 ```
-machine-trust init [path]        Generate a starter machine-trust.config.json
-machine-trust generate           Write jsonld.json, llms.txt, llms-full.txt,
-  [-o dir]                         robots.txt, and the answer-first snippet
-machine-trust validate           Print the scorecard without writing a report
-  [-c file] [--html file]
-  machine-trust audit              Validate and write MACHINE_TRUST_SCORECARD.md
-  [-c file] [--html file]         (--report overrides the output path)
-  [--report file]
-  [--fixed-timestamp ISO]          Produce a reproducible scorecard timestamp
+machine-trust init [path] [--force]
+    Generate a starter machine-trust.config.json
+
+machine-trust generate [-c file] [-o dir]
+    Write jsonld.json, llms.txt, llms-full.txt, robots.txt,
+    and the answer-first snippet
+
+machine-trust validate [-c file] [--html file]
+    Print the scorecard without writing a report
+
+machine-trust audit [-c file] [--html file] [--report file]
+                    [--fixed-timestamp ISO]
+    Validate and write MACHINE_TRUST_SCORECARD.md
+    (--report overrides the output path; --fixed-timestamp
+    produces a reproducible scorecard timestamp)
 ```
 
 ## Programmatic API
