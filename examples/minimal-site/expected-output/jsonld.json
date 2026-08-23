@@ -1,0 +1,62 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://shop.auroranotebooks.example#organization",
+      "name": "Aurora Notebooks",
+      "url": "https://shop.auroranotebooks.example",
+      "description": "Handbound notebooks and field journals, made in Rotterdam.",
+      "legalName": "Aurora Notebooks",
+      "logo": "https://shop.auroranotebooks.example/logo.png",
+      "email": "hello@auroranotebooks.example",
+      "parentOrganization": {
+        "@type": "Organization",
+        "name": "Nymrel",
+        "url": "https://nymrel.com",
+        "legalName": "Nymrel (a JalenBuilds LLC company)",
+        "description": "Autonomous software systems and digital services umbrella.",
+        "parentOrganization": {
+          "@type": "Organization",
+          "name": "JalenBuilds LLC",
+          "url": "https://nymrel.com",
+          "legalName": "JalenBuilds LLC",
+          "description": "Parent holding company and technical venture studio."
+        }
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://shop.auroranotebooks.example#website",
+      "url": "https://shop.auroranotebooks.example",
+      "name": "Aurora Notebooks",
+      "description": "Handbound notebooks and field journals, made in Rotterdam.",
+      "publisher": {
+        "@id": "https://shop.auroranotebooks.example#organization"
+      }
+    },
+    {
+      "@type": "Product",
+      "@id": "https://shop.auroranotebooks.example/field-journal#product",
+      "name": "Aurora Field Journal",
+      "description": "The Aurora Field Journal is a 192-page handbound notebook with dot-grid paper, a waxed canvas cover, and a lay-flat binding.",
+      "brand": {
+        "@type": "Brand",
+        "name": "Aurora Notebooks"
+      },
+      "url": "https://shop.auroranotebooks.example/field-journal",
+      "image": "https://shop.auroranotebooks.example/field-journal.jpg",
+      "sku": "AN-FJ-001",
+      "category": "Notebooks",
+      "offers": [
+        {
+          "@type": "Offer",
+          "price": "24.00",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "url": "https://shop.auroranotebooks.example/field-journal"
+        }
+      ]
+    }
+  ]
+}

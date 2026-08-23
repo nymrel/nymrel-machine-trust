@@ -1,0 +1,29 @@
+# Aurora Notebooks — Machine Index
+
+> Handbound notebooks and field journals, made in Rotterdam and shipped carbon-neutral to 40 countries.
+
+## Products
+
+Current catalogue with live stock status.
+
+- [Aurora Field Journal](https://shop.auroranotebooks.example/field-journal): 192-page handbound dot-grid journal, $24.00, in stock.
+
+## Policies
+
+- [Shipping & Returns](https://shop.auroranotebooks.example/shipping): Carbon-neutral delivery to 40 countries; 30-day returns.
+
+---
+
+## Comprehensive Documentation & Machine Index
+
+### Architecture & Core Interfaces
+
+This full index is optimized for autonomous ingestion and deep context retrieval by frontier reasoning models.
+
+#### Products
+- **Aurora Field Journal** (https://shop.auroranotebooks.example/field-journal)
+  Description: 192-page handbound dot-grid journal, $24.00, in stock.
+
+#### Policies
+- **Shipping & Returns** (https://shop.auroranotebooks.example/shipping)
+  Description: Carbon-neutral delivery to 40 countries; 30-day returns.

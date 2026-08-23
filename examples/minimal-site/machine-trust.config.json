@@ -1,0 +1,69 @@
+{
+  "entity": {
+    "name": "Aurora Notebooks",
+    "legalName": "Aurora Notebooks",
+    "url": "https://shop.auroranotebooks.example",
+    "logo": "https://shop.auroranotebooks.example/logo.png",
+    "description": "Handbound notebooks and field journals, made in Rotterdam.",
+    "email": "hello@auroranotebooks.example"
+  },
+  "product": {
+    "name": "Aurora Field Journal",
+    "description": "The Aurora Field Journal is a 192-page handbound notebook with dot-grid paper, a waxed canvas cover, and a lay-flat binding.",
+    "brand": "Aurora Notebooks",
+    "url": "https://shop.auroranotebooks.example/field-journal",
+    "image": "https://shop.auroranotebooks.example/field-journal.jpg",
+    "sku": "AN-FJ-001",
+    "category": "Notebooks",
+    "offers": [
+      {
+        "price": "24.00",
+        "priceCurrency": "USD",
+        "availability": "InStock",
+        "url": "https://shop.auroranotebooks.example/field-journal"
+      }
+    ]
+  },
+  "llmsTxt": {
+    "title": "Aurora Notebooks — Machine Index",
+    "summary": "Handbound notebooks and field journals, made in Rotterdam and shipped carbon-neutral to 40 countries.",
+    "sections": [
+      {
+        "title": "Products",
+        "description": "Current catalogue with live stock status.",
+        "links": [
+          {
+            "title": "Aurora Field Journal",
+            "url": "https://shop.auroranotebooks.example/field-journal",
+            "description": "192-page handbound dot-grid journal, $24.00, in stock."
+          }
+        ]
+      },
+      {
+        "title": "Policies",
+        "links": [
+          {
+            "title": "Shipping & Returns",
+            "url": "https://shop.auroranotebooks.example/shipping",
+            "description": "Carbon-neutral delivery to 40 countries; 30-day returns."
+          }
+        ]
+      }
+    ],
+    "tokenBudget": 4000
+  },
+  "robotsTxt": {
+    "sitemapUrl": "https://shop.auroranotebooks.example/sitemap.xml",
+    "host": "shop.auroranotebooks.example",
+    "posture": "allow_ai_search_disallow_training"
+  },
+  "answerFirst": {
+    "summary": "Aurora Notebooks ships handbound journals with tracked carbon-neutral delivery to forty countries. Every product page carries structured data, an explicit AI crawler policy, and a machine-readable index so assistants can quote prices and stock status without guessing. Orders ship within two business days from our Rotterdam workshop.",
+    "entityName": "Aurora Notebooks",
+    "keyTakeaways": [
+      "192-page handbound dot-grid journal, $24.00, in stock",
+      "Carbon-neutral delivery to 40 countries with 30-day returns",
+      "Orders leave the Rotterdam workshop within two business days"
+    ]
+  }
+}
