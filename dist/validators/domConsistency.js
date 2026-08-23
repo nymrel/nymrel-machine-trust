@@ -1,10 +1,19 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.extractTextFromHtml = extractTextFromHtml;
+exports.normalizeText = normalizeText;
+exports.extractPrices = extractPrices;
+exports.verifyDomConsistency = verifyDomConsistency;
 /**
  * Strips HTML tags and normalizes whitespace
  */
-export function extractTextFromHtml(html) {
+function extractTextFromHtml(html) {
+    // Remove script and style tags and their contents
     let clean = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ');
     clean = clean.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ');
+    // Replace HTML tags with spaces
     clean = clean.replace(/<[^>]+>/g, ' ');
+    // Decode basic HTML entities
     clean = clean
         .replace(/&amp;/g, '&')
         .replace(/&lt;/g, '<')
@@ -12,12 +21,13 @@ export function extractTextFromHtml(html) {
         .replace(/&quot;/g, '"')
         .replace(/&#039;/g, "'")
         .replace(/&nbsp;/g, ' ');
+    // Collapse whitespace
     return clean.replace(/\s+/g, ' ').trim();
 }
 /**
  * Normalizes text for comparison (lowercase, trimmed, collapsed whitespace, punctuation simplified)
  */
-export function normalizeText(text) {
+function normalizeText(text) {
     if (!text)
         return '';
     return text
@@ -30,14 +40,14 @@ export function normalizeText(text) {
 /**
  * Extracts prices from text (e.g., "$49", "49.00", "USD 49", "0.00", "Free")
  */
-export function extractPrices(text) {
+function extractPrices(text) {
     const matches = text.match(/(?:\$|€|£|USD\s*|EUR\s*|GBP\s*)?\b\d+(?:\.\d{2})?\b|\bfree\b/gi) || [];
     return matches.map((m) => m.toLowerCase().trim());
 }
 /**
  * Verifies that structured data in JSON-LD matches rendered visible DOM text
  */
-export function verifyDomConsistency(jsonLd, html) {
+function verifyDomConsistency(jsonLd, html) {
     const visibleText = extractTextFromHtml(html);
     const normalizedDom = normalizeText(visibleText);
     const checks = [];
@@ -106,6 +116,7 @@ export function verifyDomConsistency(jsonLd, html) {
                 const priceStr = String(offer.price);
                 const priceNum = parseFloat(priceStr);
                 const currency = (offer.priceCurrency || 'USD').toUpperCase();
+                // Check various formats: "$49", "49", "49.00", "Free"
                 const isFree = priceNum === 0 || priceStr.toLowerCase() === 'free';
                 const priceVariations = isFree
                     ? ['free', '$0', '0', '0.00']
@@ -143,6 +154,7 @@ export function verifyDomConsistency(jsonLd, html) {
     // 4. Check Description Substring / Key Entities
     if (prod && prod.description) {
         totalWeight += 15;
+        // Extract key words / sentences
         const descWords = prod.description.split(/\s+/).slice(0, 8).join(' ');
         const normalizedDescChunk = normalizeText(descWords);
         const foundChunk = normalizedDom.includes(normalizedDescChunk);
@@ -205,3 +217,4 @@ export function verifyDomConsistency(jsonLd, html) {
         checks,
     };
 }
+//# sourceMappingURL=domConsistency.js.map

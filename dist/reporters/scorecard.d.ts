@@ -7,3 +7,4 @@ export declare function runMachineTrustAudit(config: MachineTrustConfig, sampleH
  * Generates a GitHub-flavored Markdown audit scorecard
  */
 export declare function generateMarkdownScorecard(scorecard: MachineTrustAuditScorecard): string;
+//# sourceMappingURL=scorecard.d.ts.map

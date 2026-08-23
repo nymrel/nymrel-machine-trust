@@ -1,11 +1,17 @@
-export const KNOWN_AI_BOTS = {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.KNOWN_AI_BOTS = void 0;
+exports.getRulesForPosture = getRulesForPosture;
+exports.generateRobotsTxt = generateRobotsTxt;
+exports.parseRobotsTxt = parseRobotsTxt;
+exports.KNOWN_AI_BOTS = {
     SEARCH: ['OAI-SearchBot', 'PerplexityBot', 'ClaudeBot', 'Googlebot', 'Bingbot', 'Applebot'],
     TRAINING: ['GPTBot', 'Google-Extended', 'anthropic-ai', 'Applebot-Extended', 'CCBot', 'cohere-ai', 'Diffbot', 'Bytespider'],
 };
 /**
  * Builds standard bot rules based on posture
  */
-export function getRulesForPosture(posture = 'allow_ai_search_disallow_training') {
+function getRulesForPosture(posture = 'allow_ai_search_disallow_training') {
     switch (posture) {
         case 'allow_ai_search_disallow_training':
             return [
@@ -49,7 +55,7 @@ export function getRulesForPosture(posture = 'allow_ai_search_disallow_training'
 /**
  * Generates formatted robots.txt string
  */
-export function generateRobotsTxt(config = {}) {
+function generateRobotsTxt(config = {}) {
     const lines = [];
     lines.push('# ==============================================================================');
     lines.push('# Robots.txt with Explicit AI Search & Machine Trust Rules');
@@ -111,7 +117,7 @@ export function generateRobotsTxt(config = {}) {
 /**
  * Parses existing robots.txt into structured rule matrix
  */
-export function parseRobotsTxt(content) {
+function parseRobotsTxt(content) {
     const lines = content.split('\n');
     const result = {
         sitemaps: [],
@@ -136,6 +142,7 @@ export function parseRobotsTxt(content) {
             result.sitemaps.push(value);
         }
         else if (key === 'user-agent') {
+            // If previous line wasn't user-agent, reset currentAgents
             if (i > 0) {
                 const prevLine = lines[i - 1].split('#')[0].trim().toLowerCase();
                 if (!prevLine.startsWith('user-agent:')) {
@@ -174,3 +181,4 @@ export function parseRobotsTxt(content) {
     }
     return result;
 }
+//# sourceMappingURL=robotsTxt.js.map

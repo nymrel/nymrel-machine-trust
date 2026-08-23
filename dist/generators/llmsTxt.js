@@ -1,9 +1,16 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.estimateTokens = estimateTokens;
+exports.generateLlmsTxt = generateLlmsTxt;
+exports.generateLlmsFullTxt = generateLlmsFullTxt;
+exports.parseLlmsTxt = parseLlmsTxt;
 /**
  * Estimates token count using standard GPT/LLM heuristic (~4 characters per token or 0.75 words)
  */
-export function estimateTokens(text) {
+function estimateTokens(text) {
     if (!text)
         return 0;
+    // A blend of character length and word count for accurate markdown token estimation
     const charTokens = Math.ceil(text.length / 4);
     const wordCount = text.trim().split(/\s+/).length;
     const wordTokens = Math.ceil(wordCount * 1.3);
@@ -12,7 +19,7 @@ export function estimateTokens(text) {
 /**
  * Generates standard /llms.txt markdown string
  */
-export function generateLlmsTxt(config) {
+function generateLlmsTxt(config) {
     const lines = [];
     // Title (H1)
     lines.push(`# ${config.title}`);
@@ -63,6 +70,7 @@ export function generateLlmsTxt(config) {
     if (config.tokenBudget && config.tokenBudget > 0) {
         const currentTokens = estimateTokens(output);
         if (currentTokens > config.tokenBudget) {
+            // Annotate or handle budget constraint
             console.warn(`[MachineTrust:llms.txt] Generated tokens (${currentTokens}) exceed tokenBudget (${config.tokenBudget})`);
         }
     }
@@ -71,7 +79,7 @@ export function generateLlmsTxt(config) {
 /**
  * Generates /llms-full.txt including extended technical documentation or inlined context
  */
-export function generateLlmsFullTxt(config) {
+function generateLlmsFullTxt(config) {
     const baseLlms = generateLlmsTxt(config);
     const lines = [baseLlms, '---', '', '## Comprehensive Documentation & Machine Index', ''];
     if (config.fullContent) {
@@ -99,7 +107,7 @@ export function generateLlmsFullTxt(config) {
 /**
  * Parses an existing llms.txt file into structured data
  */
-export function parseLlmsTxt(content) {
+function parseLlmsTxt(content) {
     const lines = content.split('\n');
     let title = '';
     const summaryLines = [];
@@ -138,6 +146,7 @@ export function parseLlmsTxt(content) {
             }
             continue;
         }
+        // Paragraph in section (description)
         if (currentSection && currentSection.links.length === 0 && !line.startsWith('-')) {
             currentSection.description = currentSection.description
                 ? `${currentSection.description} ${line}`
@@ -154,3 +163,4 @@ export function parseLlmsTxt(content) {
         tokenCount: estimateTokens(content),
     };
 }
+//# sourceMappingURL=llmsTxt.js.map

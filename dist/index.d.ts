@@ -13,3 +13,4 @@ export * from './generators/answerFirst.js';
 export * from './validators/domConsistency.js';
 export * from './validators/crawlerAccess.js';
 export * from './reporters/index.js';
+//# sourceMappingURL=index.d.ts.map

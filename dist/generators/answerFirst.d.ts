@@ -19,3 +19,4 @@ export declare function generateAnswerFirstHtml(config: AnswerFirstConfig): stri
  * Injects Answer-First HTML block into existing HTML document string
  */
 export declare function injectAnswerFirstBlock(html: string, config: AnswerFirstConfig): string;
+//# sourceMappingURL=answerFirst.d.ts.map

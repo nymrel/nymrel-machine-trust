@@ -15,3 +15,4 @@ export declare function extractPrices(text: string): string[];
  * Verifies that structured data in JSON-LD matches rendered visible DOM text
  */
 export declare function verifyDomConsistency(jsonLd: any, html: string): DomConsistencyCheckResult;
+//# sourceMappingURL=domConsistency.d.ts.map

@@ -157,3 +157,4 @@ export interface CrawlerAuditResult {
     declaredSitemap: boolean;
     declaredLlmsTxt: boolean;
 }
+//# sourceMappingURL=types.d.ts.map

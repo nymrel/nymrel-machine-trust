@@ -24,3 +24,4 @@ export interface ParsedRobotsTxt {
  * Parses existing robots.txt into structured rule matrix
  */
 export declare function parseRobotsTxt(content: string): ParsedRobotsTxt;
+//# sourceMappingURL=robotsTxt.d.ts.map

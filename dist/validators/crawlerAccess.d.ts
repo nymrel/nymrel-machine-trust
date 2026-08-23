@@ -11,3 +11,4 @@ export declare function isPathAllowed(parsed: ReturnType<typeof parseRobotsTxt>,
  * Performs a comprehensive AI crawler access audit against robots.txt
  */
 export declare function auditCrawlerAccess(robotsTxtContent: string): CrawlerAuditResult;
+//# sourceMappingURL=crawlerAccess.d.ts.map

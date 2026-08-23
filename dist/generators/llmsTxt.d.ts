@@ -1,4 +1,4 @@
-import { LlmsTxtConfig, LlmsLink } from '../types.js';
+import { LlmsTxtConfig } from '../types.js';
 /**
  * Estimates token count using standard GPT/LLM heuristic (~4 characters per token or 0.75 words)
  */
@@ -29,3 +29,4 @@ export interface ParsedLlmsTxt {
  * Parses an existing llms.txt file into structured data
  */
 export declare function parseLlmsTxt(content: string): ParsedLlmsTxt;
+//# sourceMappingURL=llmsTxt.d.ts.map

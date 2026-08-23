@@ -1,12 +1,15 @@
-export function formatCliReport(scorecard) {
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.formatCliReport = formatCliReport;
+function formatCliReport(scorecard) {
     const lines = [];
     const gradeColor = scorecard.grade.startsWith('A')
-        ? '\x1b[32m'
+        ? '\x1b[32m' // Green
         : scorecard.grade === 'B'
-            ? '\x1b[36m'
+            ? '\x1b[36m' // Cyan
             : scorecard.grade === 'C'
-                ? '\x1b[33m'
-                : '\x1b[31m';
+                ? '\x1b[33m' // Yellow
+                : '\x1b[31m'; // Red
     const reset = '\x1b[0m';
     const bold = '\x1b[1m';
     const dim = '\x1b[2m';
@@ -40,3 +43,4 @@ export function formatCliReport(scorecard) {
     lines.push('');
     return lines.join('\n');
 }
+//# sourceMappingURL=cliReporter.js.map

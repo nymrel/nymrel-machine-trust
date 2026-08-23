@@ -1,7 +1,13 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.countWords = countWords;
+exports.validateWordCount = validateWordCount;
+exports.generateAnswerFirstHtml = generateAnswerFirstHtml;
+exports.injectAnswerFirstBlock = injectAnswerFirstBlock;
 /**
  * Accurately counts words in a text string
  */
-export function countWords(text) {
+function countWords(text) {
     if (!text)
         return 0;
     return text.trim().split(/\s+/).filter(Boolean).length;
@@ -9,7 +15,7 @@ export function countWords(text) {
 /**
  * Validates word count against 40-60 word executive answer standard
  */
-export function validateWordCount(text, range = [40, 60]) {
+function validateWordCount(text, range = [40, 60]) {
     const count = countWords(text);
     const [min, max] = range;
     if (count < min) {
@@ -35,7 +41,7 @@ export function validateWordCount(text, range = [40, 60]) {
 /**
  * Generates an accessible, SEO-optimized Answer-First HTML block
  */
-export function generateAnswerFirstHtml(config) {
+function generateAnswerFirstHtml(config) {
     const { summary, keyTakeaways = [], entityName } = config;
     let takeawaysHtml = '';
     if (keyTakeaways.length > 0) {
@@ -57,7 +63,7 @@ export function generateAnswerFirstHtml(config) {
 /**
  * Injects Answer-First HTML block into existing HTML document string
  */
-export function injectAnswerFirstBlock(html, config) {
+function injectAnswerFirstBlock(html, config) {
     const block = generateAnswerFirstHtml(config);
     // 1. If explicit placeholder exists
     if (html.includes('<!-- MACHINE_TRUST_ANSWER_FIRST -->')) {
@@ -98,3 +104,4 @@ function escapeHtml(str) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#039;');
 }
+//# sourceMappingURL=answerFirst.js.map

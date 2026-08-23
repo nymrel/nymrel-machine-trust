@@ -1,17 +1,21 @@
-import { generateJsonLd, validateJsonLdStructure } from '../generators/jsonLd.js';
-import { generateLlmsTxt, estimateTokens } from '../generators/llmsTxt.js';
-import { generateRobotsTxt } from '../generators/robotsTxt.js';
-import { validateWordCount } from '../generators/answerFirst.js';
-import { auditCrawlerAccess } from '../validators/crawlerAccess.js';
-import { verifyDomConsistency } from '../validators/domConsistency.js';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.runMachineTrustAudit = runMachineTrustAudit;
+exports.generateMarkdownScorecard = generateMarkdownScorecard;
+const jsonLd_js_1 = require("../generators/jsonLd.js");
+const llmsTxt_js_1 = require("../generators/llmsTxt.js");
+const robotsTxt_js_1 = require("../generators/robotsTxt.js");
+const answerFirst_js_1 = require("../generators/answerFirst.js");
+const crawlerAccess_js_1 = require("../validators/crawlerAccess.js");
+const domConsistency_js_1 = require("../validators/domConsistency.js");
 /**
  * Executes a full Machine Trust audit across all 5 dimensions
  */
-export function runMachineTrustAudit(config, sampleHtml) {
+function runMachineTrustAudit(config, sampleHtml) {
     const checks = [];
     // 1. Entity Graph Checks
-    const jsonLd = generateJsonLd(config);
-    const jsonLdValidation = validateJsonLdStructure(jsonLd);
+    const jsonLd = (0, jsonLd_js_1.generateJsonLd)(config);
+    const jsonLdValidation = (0, jsonLd_js_1.validateJsonLdStructure)(jsonLd);
     if (jsonLdValidation.valid) {
         checks.push({
             id: 'ENTITY_JSONLD_SYNTAX',
@@ -60,8 +64,8 @@ export function runMachineTrustAudit(config, sampleHtml) {
     }
     // 2. LLMs.txt Checks
     if (config.llmsTxt) {
-        const llmsTxtContent = generateLlmsTxt(config.llmsTxt);
-        const tokens = estimateTokens(llmsTxtContent);
+        const llmsTxtContent = (0, llmsTxt_js_1.generateLlmsTxt)(config.llmsTxt);
+        const tokens = (0, llmsTxt_js_1.estimateTokens)(llmsTxtContent);
         const budget = config.llmsTxt.tokenBudget || 4000;
         if (tokens <= budget) {
             checks.push({
@@ -98,8 +102,8 @@ export function runMachineTrustAudit(config, sampleHtml) {
         });
     }
     // 3. Robots.txt Crawler Access Checks
-    const robotsTxtContent = generateRobotsTxt(config.robotsTxt);
-    const crawlerAudit = auditCrawlerAccess(robotsTxtContent);
+    const robotsTxtContent = (0, robotsTxt_js_1.generateRobotsTxt)(config.robotsTxt);
+    const crawlerAudit = (0, crawlerAccess_js_1.auditCrawlerAccess)(robotsTxtContent);
     if (crawlerAudit.overallEligible) {
         checks.push({
             id: 'ROBOTS_AI_SEARCH_ACCESS',
@@ -124,7 +128,7 @@ export function runMachineTrustAudit(config, sampleHtml) {
     }
     // 4. Answer-First Summary Block Checks
     if (config.answerFirst) {
-        const wordCheck = validateWordCount(config.answerFirst.summary, config.answerFirst.wordCountRange || [40, 60]);
+        const wordCheck = (0, answerFirst_js_1.validateWordCount)(config.answerFirst.summary, config.answerFirst.wordCountRange || [40, 60]);
         if (wordCheck.valid) {
             checks.push({
                 id: 'ANSWER_FIRST_WORD_COUNT',
@@ -161,7 +165,7 @@ export function runMachineTrustAudit(config, sampleHtml) {
     }
     // 5. DOM Consistency Check
     if (sampleHtml) {
-        const domResult = verifyDomConsistency(jsonLd, sampleHtml);
+        const domResult = (0, domConsistency_js_1.verifyDomConsistency)(jsonLd, sampleHtml);
         if (domResult.consistent) {
             checks.push({
                 id: 'DOM_STRUCTURED_DATA_PARITY',
@@ -238,7 +242,7 @@ export function runMachineTrustAudit(config, sampleHtml) {
 /**
  * Generates a GitHub-flavored Markdown audit scorecard
  */
-export function generateMarkdownScorecard(scorecard) {
+function generateMarkdownScorecard(scorecard) {
     const lines = [];
     lines.push(`# Machine Trust & Dual-Audience Audit Scorecard`);
     lines.push('');
@@ -247,6 +251,7 @@ export function generateMarkdownScorecard(scorecard) {
     lines.push(`> **Generated:** ${scorecard.timestamp}  `);
     lines.push(`> **Engine:** \`@nymrel/machine-trust\` v1.0.0`);
     lines.push('');
+    // Status Summary
     lines.push(`## Summary`);
     lines.push('');
     lines.push(`| Status | Count | Benchmark Target |`);
@@ -255,6 +260,7 @@ export function generateMarkdownScorecard(scorecard) {
     lines.push(`| Warnings | **${scorecard.warnCount}** | 0 |`);
     lines.push(`| Failed | **${scorecard.failCount}** | 0 |`);
     lines.push('');
+    // Detailed Table
     lines.push(`## Audit Breakdown`);
     lines.push('');
     lines.push(`| Category | Check | Status | Score | Findings & Verification |`);
@@ -274,3 +280,4 @@ export function generateMarkdownScorecard(scorecard) {
     lines.push('');
     return lines.join('\n').trim() + '\n';
 }
+//# sourceMappingURL=scorecard.js.map
