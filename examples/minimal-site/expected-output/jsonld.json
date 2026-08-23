@@ -9,21 +9,7 @@
       "description": "Handbound notebooks and field journals, made in Rotterdam.",
       "legalName": "Aurora Notebooks",
       "logo": "https://shop.auroranotebooks.example/logo.png",
-      "email": "hello@auroranotebooks.example",
-      "parentOrganization": {
-        "@type": "Organization",
-        "name": "Nymrel",
-        "url": "https://nymrel.com",
-        "legalName": "Nymrel (a JalenBuilds LLC company)",
-        "description": "Autonomous software systems and digital services umbrella.",
-        "parentOrganization": {
-          "@type": "Organization",
-          "name": "JalenBuilds LLC",
-          "url": "https://nymrel.com",
-          "legalName": "JalenBuilds LLC",
-          "description": "Parent holding company and technical venture studio."
-        }
-      }
+      "email": "hello@auroranotebooks.example"
     },
     {
       "@type": "WebSite",

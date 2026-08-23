@@ -6,6 +6,7 @@
  * Licensed under the MIT License.
  */
 export * from './types.js';
+export * from './errors.js';
 export * from './generators/jsonLd.js';
 export * from './generators/llmsTxt.js';
 export * from './generators/robotsTxt.js';

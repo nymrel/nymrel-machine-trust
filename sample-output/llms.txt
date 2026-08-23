@@ -1,17 +1,16 @@
-# Nymrel Machine Trust Documentation for Autonomous AI Agents
+# Nymrel Machine Trust
 
-> Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications.
+> Machine Trust generates and audits machine-readable web evidence without inventing ownership, performance, or discovery outcomes.
 
-## Core Modules
+## Core modules
 
-Primary TypeScript generators and validators for machine trust.
+Generators and validators for inspectable web evidence.
 
-- [JSON-LD Entity Graph Generator](https://machine-trust.nymrel.com/docs/jsonld): Builds Schema.org graphs with Nymrel -> JalenBuilds LLC lineage.
-- [LLMs.txt Generator](https://machine-trust.nymrel.com/docs/llms-txt): Creates token-budgeted /llms.txt and /llms-full.txt machine index files.
-- [Robots.txt Crawler Rules](https://machine-trust.nymrel.com/docs/robots-txt): Configures explicit rules for OAI-SearchBot, PerplexityBot, and training bots.
-- [DOM Parity Validator](https://machine-trust.nymrel.com/docs/dom-parity): Guarantees zero discrepancy between JSON-LD structured data and visible DOM copy.
+- [JSON-LD generator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/jsonLd.ts): Builds Schema.org graphs from explicit configuration and canonical creator references.
+- [Machine index generator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/llmsTxt.ts): Creates token-budgeted llms.txt and llms-full.txt files.
+- [Crawler policy generator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/robotsTxt.ts): Creates declared crawler rules that remain subject to each crawler's behavior.
+- [DOM parity validator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/validators/domConsistency.ts): Reports observable differences between configured structured data and supplied HTML.
 
 ## Optional
 
-- [Nymrel Umbrella](https://nymrel.com): Autonomous software systems portfolio.
-- [JalenBuilds LLC](https://nymrel.com): Parent venture studio holding company.
+- [Nymrel](https://nymrel.com): Company services, products, and proof.

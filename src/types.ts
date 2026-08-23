@@ -22,7 +22,17 @@ export interface OrganizationConfig {
   telephone?: string;
   sameAs?: string[];
   foundingDate?: string;
+  /**
+   * Explicit caller-supplied corporate parent. Never inferred or defaulted:
+   * when omitted, the generated graph asserts no lineage at all.
+   */
   parentOrganization?: ParentOrganizationConfig;
+  /**
+   * Explicitly attribute the property to Nymrel by reference. When true, the
+   * Organization node gains `creator: { "@id": "https://nymrel.com/#organization" }`
+   * — no inline canonical organization node is minted.
+   */
+  nymrelAttribution?: boolean;
 }
 
 export interface OfferConfig {
@@ -149,6 +159,16 @@ export interface MachineTrustAuditScorecard {
   timestamp: string;
   entityName: string;
   checks: CheckItem[];
+}
+
+/** Options for deterministic audit runs. */
+export interface MachineTrustAuditOptions {
+  /**
+   * Fixed ISO-8601 timestamp recorded in the scorecard. When omitted, the
+   * current time is used (backward-compatible default). Identical inputs with
+   * an identical fixed timestamp produce byte-identical scorecards.
+   */
+  fixedTimestamp?: string;
 }
 
 export interface DomConsistencyCheckResult {

@@ -1,8 +1,49 @@
-import { MachineTrustConfig, ParentOrganizationConfig } from '../types.js';
+import { MachineTrustConfig, OrganizationConfig, ParentOrganizationConfig } from '../types.js';
 /**
- * Creates canonical Nymrel -> JalenBuilds LLC parent organization hierarchy
+ * Canonical @id of the Nymrel organization node, used for attribution by
+ * reference. Nymrel is the studio brand; its legal entity is expressed via
+ * `legalName` — never as a minted subsidiary chain inside someone else's graph.
+ */
+export declare const NYMREL_ORGANIZATION_ID = "https://nymrel.com/#organization";
+/**
+ * Canonical names for verifiable machine trust: 'Nymrel' is the studio brand
+ * carried by `name`, and 'JalenBuilds LLC' is its operating legal entity,
+ * carried by `legalName`. The pair describes ONE organization node — never a
+ * two-node subsidiary chain.
+ */
+export declare const CANONICAL_NYMREL_ORG_NAME = "Nymrel";
+export declare const CANONICAL_LEGAL_NAME = "JalenBuilds LLC";
+/**
+ * Canonical single-node description of the Nymrel organization:
+ * `legalName` carries the operating legal entity (JalenBuilds LLC). Nymrel is
+ * not modeled as a subsidiary with a separate parent node — there is no such
+ * parent, and asserting one would be false.
+ *
+ * Opt-in utility for graphs that legitimately describe Nymrel inline (e.g.
+ * nymrel.com itself). Built/partner properties must not embed this node; they
+ * attribute via `entity.nymrelAttribution`, which emits a bare `@id` creator
+ * reference instead.
+ */
+export declare function createCanonicalNymrelOrganization(): ParentOrganizationConfig;
+/**
+ * Deprecated alias for {@link createCanonicalNymrelOrganization}. The name
+ * suggested a default hierarchy that was never applied implicitly and whose
+ * nested subsidiary-chain shape misrepresented the legal structure. Retained
+ * only for backward compatibility; new code should use the canonical helper.
+ *
+ * The generator NEVER applies any hierarchy implicitly: when a config omits
+ * `entity.parentOrganization`, the generated graph asserts no corporate
+ * parent at all.
+ *
+ * @deprecated Use {@link createCanonicalNymrelOrganization}.
  */
 export declare function createDefaultParentHierarchy(): ParentOrganizationConfig;
+/**
+ * Deterministically validates caller-supplied explicit relationships.
+ * Fails closed on malformed nodes, cycles, and contradictory Nymrel claims;
+ * absence of relationships is valid and produces no lineage output.
+ */
+export declare function validateExplicitEntityRelationships(entity: OrganizationConfig): void;
 /**
  * Builds Schema.org JSON-LD @graph matching Dual-Audience machine trust specifications
  */
@@ -21,31 +62,37 @@ export declare function validateJsonLdStructure(jsonLd: any): {
     errors: string[];
     warnings: string[];
 };
-/**
- * Canonical Nymrel lineage names for verifiable machine trust:
- * the studio brand (intermediate) and the legal parent company (root).
- */
-export declare const CANONICAL_INTERMEDIATE_ORG_NAME = "Nymrel";
-export declare const CANONICAL_ROOT_ORG_NAME = "JalenBuilds LLC";
-/** A single structured finding from lineage validation */
+/** A single structured finding from canonical-relationship validation */
 export interface LineageIssue {
     /** Stable machine-readable code, safe to gate on in CI */
     code: string;
     severity: 'error' | 'warning';
     message: string;
 }
-/** Deterministic result of canonical lineage validation */
+/** Deterministic result of canonical relationship validation */
 export interface LineageValidationResult {
-    /** True only when the canonical Nymrel -> JalenBuilds LLC chain is intact */
+    /** True when the graph's Nymrel relationship (if any) is expressed truthfully */
     valid: boolean;
     errors: string[];
     warnings: string[];
     issues: LineageIssue[];
 }
 /**
- * Opt-in validator: checks that an existing JSON-LD graph carries the canonical
- * Nymrel -> JalenBuilds LLC parentOrganization lineage. Read-only — it never
+ * Opt-in validator: checks how a JSON-LD graph relates to the canonical Nymrel
+ * organization, per the truthful relationship model. Read-only — it never
  * rewrites the graph or asserts anything about deployments.
+ *
+ * Canonical model:
+ * - The Nymrel organization is ONE node (`name: 'Nymrel'`,
+ *   `legalName: 'JalenBuilds LLC'`, canonical `@id`
+ *   {@link NYMREL_ORGANIZATION_ID}). It has no corporate parent; expressing
+ *   JalenBuilds LLC as a separate parentOrganization node asserts a false
+ *   subsidiary chain.
+ * - Built/partner properties attribute via a bare creator reference,
+ *   `{ "@id": "https://nymrel.com/#organization" }` — the canonical node is
+ *   never rebuilt inline alongside the reference.
+ * - Generic sites with no Nymrel relationship are VALID with zero findings;
+ *   absence of attribution is truthful, not an error.
  *
  * Accepts either a full `{ @context, @graph }` document or a bare Organization
  * node. When multiple top-level Organization entities exist, the primary one is
@@ -53,10 +100,8 @@ export interface LineageValidationResult {
  * graph order). Names are matched exactly (whitespace-trimmed,
  * case-sensitive) against the canonical constants.
  *
- * Missing or incorrect intermediate ('Nymrel') and root ('JalenBuilds LLC')
- * organization nodes are errors; nesting beyond the canonical root is a
- * non-blocking warning. Generic structural validation remains available via
- * `validateJsonLdStructure`.
+ * Findings are stable, machine-readable issues suitable for CI gates. Generic
+ * structural validation remains available via `validateJsonLdStructure`.
  */
 export declare function validateNymrelLineage(jsonLd: any): LineageValidationResult;
 //# sourceMappingURL=jsonLd.d.ts.map

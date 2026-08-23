@@ -1,18 +1,61 @@
-import { generateJsonLd, validateJsonLdStructure } from '../generators/jsonLd.js';
+import { generateJsonLd, validateJsonLdStructure, validateNymrelLineage } from '../generators/jsonLd.js';
 import { generateLlmsTxt, estimateTokens } from '../generators/llmsTxt.js';
 import { generateRobotsTxt } from '../generators/robotsTxt.js';
 import { validateWordCount } from '../generators/answerFirst.js';
 import { auditCrawlerAccess } from '../validators/crawlerAccess.js';
 import { verifyDomConsistency } from '../validators/domConsistency.js';
+import { MachineTrustConfigError } from '../errors.js';
+/**
+ * Resolves the timestamp recorded on an audit scorecard.
+ *
+ * Precedence: explicit option > MACHINE_TRUST_FIXED_TIMESTAMP env var >
+ * current time (the backward-compatible default). A provided value must parse
+ * as an ISO-8601 date; it is normalized to UTC ISO format so identical inputs
+ * produce byte-identical output.
+ */
+export function resolveAuditTimestamp(options) {
+    const raw = options?.fixedTimestamp ?? process.env.MACHINE_TRUST_FIXED_TIMESTAMP;
+    if (raw === undefined) {
+        return new Date().toISOString();
+    }
+    const isoDateTime = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(?:\.\d{1,3})?(?:Z|[+-]\d{2}:\d{2})$/;
+    if (typeof raw !== 'string' ||
+        !isoDateTime.test(raw) ||
+        Number.isNaN(Date.parse(raw))) {
+        throw new MachineTrustConfigError('INVALID_FIXED_TIMESTAMP', `Fixed timestamp must be a parseable ISO-8601 date string (received ${JSON.stringify(raw)})`);
+    }
+    return new Date(raw).toISOString();
+}
 /**
  * Executes a full Machine Trust audit across all 5 dimensions
  */
-export function runMachineTrustAudit(config, sampleHtml) {
+export function runMachineTrustAudit(config, sampleHtml, options) {
     const checks = [];
+    const timestamp = resolveAuditTimestamp(options);
     // 1. Entity Graph Checks
-    const jsonLd = generateJsonLd(config);
-    const jsonLdValidation = validateJsonLdStructure(jsonLd);
-    if (jsonLdValidation.valid) {
+    let jsonLd;
+    try {
+        jsonLd = generateJsonLd(config);
+    }
+    catch (err) {
+        if (!(err instanceof MachineTrustConfigError)) {
+            throw err;
+        }
+        checks.push({
+            id: 'ENTITY_JSONLD_SYNTAX',
+            category: 'ENTITY_GRAPH',
+            title: 'Schema.org JSON-LD Syntactic Integrity',
+            status: 'FAIL',
+            score: 0,
+            weight: 15,
+            message: `Explicit entity relationship rejected (fail closed): ${err.message}`,
+        });
+    }
+    const jsonLdValidation = jsonLd ? validateJsonLdStructure(jsonLd) : null;
+    if (!jsonLdValidation) {
+        // Config error already recorded above; skip dependent entity checks.
+    }
+    else if (jsonLdValidation.valid) {
         checks.push({
             id: 'ENTITY_JSONLD_SYNTAX',
             category: 'ENTITY_GRAPH',
@@ -34,28 +77,64 @@ export function runMachineTrustAudit(config, sampleHtml) {
             message: `JSON-LD syntax errors: ${jsonLdValidation.errors.join('; ')}`,
         });
     }
-    // Parent Organization Hierarchy check
-    const org = jsonLd['@graph'].find((i) => i['@type'] === 'Organization');
-    if (org && org.parentOrganization && org.parentOrganization.name) {
+    // Explicit Entity Lineage check — presence is verified, absence is truthful.
+    const org = jsonLd && Array.isArray(jsonLd['@graph'])
+        ? jsonLd['@graph'].find((i) => i['@type'] === 'Organization')
+        : undefined;
+    const relationshipValidation = jsonLd ? validateNymrelLineage(jsonLd) : null;
+    if (!jsonLd) {
         checks.push({
-            id: 'ENTITY_PARENT_HIERARCHY',
+            id: 'ENTITY_RELATIONSHIP_TRUTH',
             category: 'ENTITY_GRAPH',
-            title: 'Verifiable Entity Hierarchy (Parent Organization)',
+            title: 'Explicit Entity Relationship Validation',
+            status: 'FAIL',
+            score: 0,
+            weight: 15,
+            message: 'Relationship checks could not run because the explicit entity configuration was rejected.',
+        });
+    }
+    else if (relationshipValidation && !relationshipValidation.valid) {
+        checks.push({
+            id: 'ENTITY_RELATIONSHIP_TRUTH',
+            category: 'ENTITY_GRAPH',
+            title: 'Explicit Entity Relationship Validation',
+            status: 'FAIL',
+            score: 0,
+            weight: 15,
+            message: relationshipValidation.errors.join('; '),
+        });
+    }
+    else if (org && org.creator && org.creator['@id']) {
+        checks.push({
+            id: 'ENTITY_RELATIONSHIP_TRUTH',
+            category: 'ENTITY_GRAPH',
+            title: 'Explicit Entity Relationship Validation',
             status: 'PASS',
             score: 100,
             weight: 15,
-            message: `Parent organization lineage verified: ${org.name} -> ${org.parentOrganization.name}`,
+            message: `Explicit creator reference verified: ${org.creator['@id']}`,
+        });
+    }
+    else if (org && org.parentOrganization && org.parentOrganization.name) {
+        checks.push({
+            id: 'ENTITY_RELATIONSHIP_TRUTH',
+            category: 'ENTITY_GRAPH',
+            title: 'Explicit Entity Relationship Validation',
+            status: 'PASS',
+            score: 100,
+            weight: 15,
+            message: `Explicit parent organization verified: ${org.name} -> ${org.parentOrganization.name}`,
         });
     }
     else {
         checks.push({
-            id: 'ENTITY_PARENT_HIERARCHY',
+            id: 'ENTITY_RELATIONSHIP_TRUTH',
             category: 'ENTITY_GRAPH',
-            title: 'Verifiable Entity Hierarchy (Parent Organization)',
-            status: 'WARN',
-            score: 40,
+            title: 'Explicit Entity Relationship Validation',
+            status: 'PASS',
+            score: 100,
             weight: 15,
-            message: 'Missing or incomplete parentOrganization in entity graph.',
+            message: 'No corporate parent declared; the organization stands alone and no lineage is asserted.',
         });
     }
     // 2. LLMs.txt Checks
@@ -104,22 +183,22 @@ export function runMachineTrustAudit(config, sampleHtml) {
         checks.push({
             id: 'ROBOTS_AI_SEARCH_ACCESS',
             category: 'ROBOTS_TXT',
-            title: 'AI Search Crawler Discoverability (OAI-SearchBot / Perplexity)',
+            title: 'Declared AI Search Crawler Policy',
             status: 'PASS',
             score: 100,
             weight: 20,
-            message: 'AI Search Bots (OAI-SearchBot, PerplexityBot, ClaudeBot) are fully permitted to index.',
+            message: 'Generated rules declare access for OAI-SearchBot, PerplexityBot, and ClaudeBot; actual crawling and indexing are not measured.',
         });
     }
     else {
         checks.push({
             id: 'ROBOTS_AI_SEARCH_ACCESS',
             category: 'ROBOTS_TXT',
-            title: 'AI Search Crawler Discoverability (OAI-SearchBot / Perplexity)',
+            title: 'Declared AI Search Crawler Policy',
             status: 'FAIL',
             score: crawlerAudit.score,
             weight: 20,
-            message: 'Critical AI search crawlers are restricted or blocked in robots.txt.',
+            message: 'Generated rules restrict one or more configured discovery crawlers.',
         });
     }
     // 4. Answer-First Summary Block Checks
@@ -129,7 +208,7 @@ export function runMachineTrustAudit(config, sampleHtml) {
             checks.push({
                 id: 'ANSWER_FIRST_WORD_COUNT',
                 category: 'ANSWER_FIRST',
-                title: 'Answer-First 40-60 Word Executive Precision',
+                title: 'Answer-First 40-60 Word Length',
                 status: 'PASS',
                 score: 100,
                 weight: 15,
@@ -140,7 +219,7 @@ export function runMachineTrustAudit(config, sampleHtml) {
             checks.push({
                 id: 'ANSWER_FIRST_WORD_COUNT',
                 category: 'ANSWER_FIRST',
-                title: 'Answer-First 40-60 Word Executive Precision',
+                title: 'Answer-First 40-60 Word Length',
                 status: 'WARN',
                 score: 60,
                 weight: 15,
@@ -160,7 +239,7 @@ export function runMachineTrustAudit(config, sampleHtml) {
         });
     }
     // 5. DOM Consistency Check
-    if (sampleHtml) {
+    if (sampleHtml && jsonLd) {
         const domResult = verifyDomConsistency(jsonLd, sampleHtml);
         if (domResult.consistent) {
             checks.push({
@@ -190,10 +269,10 @@ export function runMachineTrustAudit(config, sampleHtml) {
             id: 'DOM_STRUCTURED_DATA_PARITY',
             category: 'DOM_CONSISTENCY',
             title: 'Structured Data vs Rendered DOM Parity',
-            status: 'PASS',
-            score: 95,
+            status: 'WARN',
+            score: 60,
             weight: 20,
-            message: 'Skipped live DOM parity (no sample HTML provided); schema passes offline self-consistency.',
+            message: 'Not measured: no sample HTML was supplied, so rendered-copy parity could not be checked.',
         });
     }
     // Calculate Overall Weighted Score
@@ -230,7 +309,7 @@ export function runMachineTrustAudit(config, sampleHtml) {
         passedCount,
         warnCount,
         failCount,
-        timestamp: new Date().toISOString(),
+        timestamp,
         entityName: config.entity.name,
         checks,
     };
@@ -242,9 +321,9 @@ export function generateMarkdownScorecard(scorecard) {
     const lines = [];
     lines.push(`# Machine Trust & Dual-Audience Audit Scorecard`);
     lines.push('');
-    lines.push(`> **Entity:** ${scorecard.entityName}  `);
-    lines.push(`> **Audit Score:** **${scorecard.overallScore} / 100** (Grade: **${scorecard.grade}**)  `);
-    lines.push(`> **Generated:** ${scorecard.timestamp}  `);
+    lines.push(`> **Entity:** ${scorecard.entityName}`);
+    lines.push(`> **Audit Score:** **${scorecard.overallScore} / 100** (Grade: **${scorecard.grade}**)`);
+    lines.push(`> **Generated:** ${scorecard.timestamp}`);
     lines.push(`> **Engine:** \`@nymrel/machine-trust\` v1.0.0`);
     lines.push('');
     // Status Summary
@@ -268,11 +347,11 @@ export function generateMarkdownScorecard(scorecard) {
     lines.push('');
     lines.push(`## Dual-Audience Compliance Doctrine`);
     lines.push('');
-    lines.push(`1. **Parent Entity Lineage:** Verifiable machine trust graph connecting child project -> Nymrel -> JalenBuilds LLC.`);
-    lines.push(`2. **Autonomous Agent Ingestion:** Curated \`/llms.txt\` and \`/llms-full.txt\` files under strict token budgets.`);
-    lines.push(`3. **AI Search Bot Crawlability:** Explicit \`robots.txt\` rules permitting \`OAI-SearchBot\`, \`PerplexityBot\`, and \`ClaudeBot\`.`);
-    lines.push(`4. **Answer-First Speed:** 40-60 word executive summaries delivering instant answers to LLM extractors.`);
-    lines.push(`5. **DOM Parity:** Zero drift between JSON-LD structured data and human-visible DOM text to prevent search penalties.`);
+    lines.push(`1. **Truthful Entity Graph:** Schema.org \`@graph\` built from explicit configuration only; declared relationships are validated, and no lineage is implied or invented.`);
+    lines.push(`2. **Machine Index Artifacts:** Generated \`/llms.txt\` and \`/llms-full.txt\` files are checked against the configured token budget.`);
+    lines.push(`3. **Declared Crawler Policy:** Generated \`robots.txt\` rules are inspected; crawler behavior and indexing are outside this audit.`);
+    lines.push(`4. **Answer-First Length:** Supplied summaries are checked against the configured word-count range.`);
+    lines.push(`5. **Supplied DOM Parity:** Structured data is compared with supplied rendered HTML; no result is claimed when HTML is absent.`);
     lines.push('');
     return lines.join('\n').trim() + '\n';
 }

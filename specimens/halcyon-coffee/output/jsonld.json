@@ -1,0 +1,45 @@
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Organization",
+      "@id": "https://halcyon-coffee.example#organization",
+      "name": "Halcyon Coffee Roasters",
+      "url": "https://halcyon-coffee.example",
+      "description": "A fictional neighborhood coffee roaster used only for deterministic audit testing.",
+      "legalName": "Halcyon Coffee Roasters LLC",
+      "email": "hello@halcyon-coffee.example"
+    },
+    {
+      "@type": "WebSite",
+      "@id": "https://halcyon-coffee.example#website",
+      "url": "https://halcyon-coffee.example",
+      "name": "Halcyon Coffee Roasters",
+      "description": "A fictional neighborhood coffee roaster used only for deterministic audit testing.",
+      "publisher": {
+        "@id": "https://halcyon-coffee.example#organization"
+      }
+    },
+    {
+      "@type": "Product",
+      "@id": "https://halcyon-coffee.example/dawn-blend#product",
+      "name": "Dawn Blend",
+      "description": "Dawn Blend is a fictional medium-roast coffee with cocoa and citrus notes.",
+      "brand": {
+        "@type": "Brand",
+        "name": "Halcyon Coffee Roasters"
+      },
+      "url": "https://halcyon-coffee.example/dawn-blend",
+      "category": "Coffee",
+      "offers": [
+        {
+          "@type": "Offer",
+          "price": "18.00",
+          "priceCurrency": "USD",
+          "availability": "https://schema.org/InStock",
+          "url": "https://halcyon-coffee.example/dawn-blend"
+        }
+      ]
+    }
+  ]
+}

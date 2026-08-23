@@ -1,0 +1,65 @@
+{
+  "overallScore": 94,
+  "grade": "A",
+  "passedCount": 5,
+  "warnCount": 1,
+  "failCount": 0,
+  "timestamp": "2026-08-23T16:00:00.000Z",
+  "entityName": "Halcyon Coffee Roasters",
+  "checks": [
+    {
+      "id": "ENTITY_JSONLD_SYNTAX",
+      "category": "ENTITY_GRAPH",
+      "title": "Schema.org JSON-LD Syntactic Integrity",
+      "status": "PASS",
+      "score": 100,
+      "weight": 15,
+      "message": "Valid Schema.org graph generated with @context and @graph."
+    },
+    {
+      "id": "ENTITY_RELATIONSHIP_TRUTH",
+      "category": "ENTITY_GRAPH",
+      "title": "Explicit Entity Relationship Validation",
+      "status": "PASS",
+      "score": 100,
+      "weight": 15,
+      "message": "No corporate parent declared; the organization stands alone and no lineage is asserted."
+    },
+    {
+      "id": "LLMS_TXT_BUDGET",
+      "category": "LLMS_TXT",
+      "title": "LLMs.txt Token Budget & Sectioning",
+      "status": "PASS",
+      "score": 100,
+      "weight": 15,
+      "message": "Structured /llms.txt within budget (61/1000 estimated tokens)."
+    },
+    {
+      "id": "ROBOTS_AI_SEARCH_ACCESS",
+      "category": "ROBOTS_TXT",
+      "title": "Declared AI Search Crawler Policy",
+      "status": "PASS",
+      "score": 100,
+      "weight": 20,
+      "message": "Generated rules declare access for OAI-SearchBot, PerplexityBot, and ClaudeBot; actual crawling and indexing are not measured."
+    },
+    {
+      "id": "ANSWER_FIRST_WORD_COUNT",
+      "category": "ANSWER_FIRST",
+      "title": "Answer-First 40-60 Word Length",
+      "status": "WARN",
+      "score": 60,
+      "weight": 15,
+      "message": "Answer-first text is too brief (19 words). Recommended range: 40-60 words for optimal AI crawler retrieval."
+    },
+    {
+      "id": "DOM_STRUCTURED_DATA_PARITY",
+      "category": "DOM_CONSISTENCY",
+      "title": "Structured Data vs Rendered DOM Parity",
+      "status": "PASS",
+      "score": 100,
+      "weight": 20,
+      "message": "JSON-LD fields match visible DOM content without drift."
+    }
+  ]
+}

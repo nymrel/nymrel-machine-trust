@@ -9,7 +9,7 @@ import {
 
 describe('Answer-First Executive Summary Block Generator', () => {
   const summary48Words =
-    'Nymrel Machine Trust is an enterprise TypeScript library that guarantees Dual-Audience SEO and AI search discoverability for modern web applications by generating verifiable Schema.org entity graphs, standard llms.txt indexes, and strict robots.txt crawler policies that allow autonomous AI search bots while preventing training scrapers.';
+    'Nymrel Machine Trust is a TypeScript library that generates structured data, machine indexes, and declared crawler policies, then reports observable differences between configured facts and supplied rendered pages. Its checks provide reproducible local evidence and explicit limitations without promising indexing, rankings, traffic, citations, customer outcomes, or revenue.';
 
   test('accurately counts words', () => {
     assert.strictEqual(countWords(''), 0);
@@ -30,14 +30,14 @@ describe('Answer-First Executive Summary Block Generator', () => {
     const html = generateAnswerFirstHtml({
       summary: summary48Words,
       entityName: 'Nymrel',
-      keyTakeaways: ['Dual-Audience Schema.org Graph', 'Zero DOM drift validation'],
+      keyTakeaways: ['Explicit Schema.org graph', 'Supplied DOM parity check'],
     });
 
     assert.ok(html.includes('<aside class="machine-trust-answer-first"'));
     assert.ok(html.includes('role="region"'));
     assert.ok(html.includes('aria-label="Executive Summary"'));
-    assert.ok(html.includes('Verified Machine Trust by Nymrel'));
-    assert.ok(html.includes('Dual-Audience Schema.org Graph'));
+    assert.ok(html.includes('Machine-readable summary for Nymrel'));
+    assert.ok(html.includes('Explicit Schema.org graph'));
   });
 
   test('injects into HTML after H1 tag', () => {

@@ -1,0 +1,34 @@
+{
+  "schema_version": "machine-trust-specimen-provenance.v1",
+  "specimen": "halcyon-coffee",
+  "evidence_class": "synthetic",
+  "fixture_timestamp": "2026-08-23T16:00:00.000Z",
+  "generator": {
+    "name": "@nymrel/machine-trust",
+    "version": "1.0.0"
+  },
+  "inputs_sha256": {
+    "config.json": "e3100f0f3c5960143a6c7ff7126b1386b0aedb3d42b87aa2b6b890d30b475516",
+    "index.html": "7859520fad464eaf9eb6aedc646cbf3a6667a4286fdd152929862de581d67799"
+  },
+  "outputs_sha256": {
+    "MACHINE_TRUST_SCORECARD.md": "de1f2e301480e419310c0ab0daa9a81b8f3f6c2e096eb389c291f44d61dcb018",
+    "answer-first-snippet.html": "9f900650a2c5df45e2840fa9bb5a6ba9e2db4540e0ac5a2096def6b52df20ab8",
+    "jsonld.json": "b705e2000c0d3ca68e844c17572a4c55264e606a34a34aa0523752e459159d35",
+    "llms-full.txt": "57005846180e82bddfec5403b1a501e5fd8a57e7411f372721c51dd594ee1d1b",
+    "llms.txt": "c8fabc6d9a04582b860d5548dad9f4f6ac7fe4010ac9bc2a8d0ee588f68c59ef",
+    "robots.txt": "5285615222bcc5aac35e135ac4041a47bb740df39d7ac8df6ae6af7ead440032",
+    "scorecard.json": "3cee0e4ca5cc8dcd8baadc2d58d5650da34fdeba2598af0b0f11f1b3d49cbf7d"
+  },
+  "seeded_nonfatal_warning": {
+    "id": "ANSWER_FIRST_WORD_COUNT",
+    "status": "WARN",
+    "message": "Answer-first text is too brief (19 words). Recommended range: 40-60 words for optimal AI crawler retrieval."
+  },
+  "limitations": [
+    "Fictional names and .example domains only.",
+    "No live crawler, indexing, ranking, traffic, citation, customer, or revenue evidence.",
+    "The warning is deliberately retained to demonstrate honest nonfatal reporting.",
+    "provenance.json is excluded from its own output hash map to avoid self-reference."
+  ]
+}

@@ -1,0 +1,55 @@
+{
+  "entity": {
+    "name": "Halcyon Coffee Roasters",
+    "legalName": "Halcyon Coffee Roasters LLC",
+    "url": "https://halcyon-coffee.example",
+    "description": "A fictional neighborhood coffee roaster used only for deterministic audit testing.",
+    "email": "hello@halcyon-coffee.example"
+  },
+  "product": {
+    "name": "Dawn Blend",
+    "description": "Dawn Blend is a fictional medium-roast coffee with cocoa and citrus notes.",
+    "brand": "Halcyon Coffee Roasters",
+    "url": "https://halcyon-coffee.example/dawn-blend",
+    "category": "Coffee",
+    "offers": [
+      {
+        "price": "18.00",
+        "priceCurrency": "USD",
+        "availability": "InStock",
+        "url": "https://halcyon-coffee.example/dawn-blend"
+      }
+    ]
+  },
+  "llmsTxt": {
+    "title": "Halcyon Coffee Roasters",
+    "summary": "A fictional coffee roaster specimen for deterministic Machine Trust audit testing.",
+    "sections": [
+      {
+        "title": "Products",
+        "links": [
+          {
+            "title": "Dawn Blend",
+            "url": "https://halcyon-coffee.example/dawn-blend",
+            "description": "Fictional medium-roast coffee, USD 18.00, marked in stock."
+          }
+        ]
+      }
+    ],
+    "tokenBudget": 1000
+  },
+  "robotsTxt": {
+    "sitemapUrl": "https://halcyon-coffee.example/sitemap.xml",
+    "host": "halcyon-coffee.example",
+    "posture": "allow_ai_search_disallow_training"
+  },
+  "answerFirst": {
+    "summary": "Halcyon Coffee Roasters offers the fictional Dawn Blend for USD 18.00, with machine-readable product details and declared crawler rules.",
+    "entityName": "Halcyon Coffee Roasters",
+    "keyTakeaways": [
+      "Synthetic fixture only",
+      "No customer or production evidence",
+      "One short-summary warning is intentionally retained"
+    ]
+  }
+}

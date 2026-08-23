@@ -9,6 +9,9 @@
 // Types
 export * from './types.js';
 
+// Errors
+export * from './errors.js';
+
 // Generators
 export * from './generators/jsonLd.js';
 export * from './generators/llmsTxt.js';

@@ -6,23 +6,150 @@ import {
   FAQItem,
   BreadcrumbItem,
 } from '../types.js';
+import { MachineTrustConfigError } from '../errors.js';
 
 /**
- * Creates canonical Nymrel -> JalenBuilds LLC parent organization hierarchy
+ * Canonical @id of the Nymrel organization node, used for attribution by
+ * reference. Nymrel is the studio brand; its legal entity is expressed via
+ * `legalName` — never as a minted subsidiary chain inside someone else's graph.
+ */
+export const NYMREL_ORGANIZATION_ID = 'https://nymrel.com/#organization';
+
+/**
+ * Canonical names for verifiable machine trust: 'Nymrel' is the studio brand
+ * carried by `name`, and 'JalenBuilds LLC' is its operating legal entity,
+ * carried by `legalName`. The pair describes ONE organization node — never a
+ * two-node subsidiary chain.
+ */
+export const CANONICAL_NYMREL_ORG_NAME = 'Nymrel';
+export const CANONICAL_LEGAL_NAME = 'JalenBuilds LLC';
+
+/**
+ * Canonical single-node description of the Nymrel organization:
+ * `legalName` carries the operating legal entity (JalenBuilds LLC). Nymrel is
+ * not modeled as a subsidiary with a separate parent node — there is no such
+ * parent, and asserting one would be false.
+ *
+ * Opt-in utility for graphs that legitimately describe Nymrel inline (e.g.
+ * nymrel.com itself). Built/partner properties must not embed this node; they
+ * attribute via `entity.nymrelAttribution`, which emits a bare `@id` creator
+ * reference instead.
+ */
+export function createCanonicalNymrelOrganization(): ParentOrganizationConfig {
+  return {
+    name: CANONICAL_NYMREL_ORG_NAME,
+    legalName: CANONICAL_LEGAL_NAME,
+    url: 'https://nymrel.com',
+    description: 'Autonomous software systems and digital services studio.',
+  };
+}
+
+/**
+ * Deprecated alias for {@link createCanonicalNymrelOrganization}. The name
+ * suggested a default hierarchy that was never applied implicitly and whose
+ * nested subsidiary-chain shape misrepresented the legal structure. Retained
+ * only for backward compatibility; new code should use the canonical helper.
+ *
+ * The generator NEVER applies any hierarchy implicitly: when a config omits
+ * `entity.parentOrganization`, the generated graph asserts no corporate
+ * parent at all.
+ *
+ * @deprecated Use {@link createCanonicalNymrelOrganization}.
  */
 export function createDefaultParentHierarchy(): ParentOrganizationConfig {
-  return {
-    name: 'Nymrel',
-    legalName: 'Nymrel (a JalenBuilds LLC company)',
-    url: 'https://nymrel.com',
-    description: 'Autonomous software systems and digital services umbrella.',
-    parentOrganization: {
-      name: 'JalenBuilds LLC',
-      legalName: 'JalenBuilds LLC',
-      url: 'https://nymrel.com',
-      description: 'Parent holding company and technical venture studio.',
-    },
-  };
+  return createCanonicalNymrelOrganization();
+}
+
+function assertPlainObject(value: any): void {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    throw new MachineTrustConfigError(
+      'PARENT_ORGANIZATION_MALFORMED',
+      "'parentOrganization' must be an object with non-empty string 'name' and 'url'"
+    );
+  }
+}
+
+/**
+ * Deterministically validates caller-supplied explicit relationships.
+ * Fails closed on malformed nodes, cycles, and contradictory Nymrel claims;
+ * absence of relationships is valid and produces no lineage output.
+ */
+export function validateExplicitEntityRelationships(entity: OrganizationConfig): void {
+  if (entity.nymrelAttribution !== undefined && typeof entity.nymrelAttribution !== 'boolean') {
+    throw new MachineTrustConfigError(
+      'INVALID_NYMREL_ATTRIBUTION',
+      `'entity.nymrelAttribution' must be a boolean when present (received ${typeof entity.nymrelAttribution})`
+    );
+  }
+
+  // Contradiction: a nymrel.com property cannot be "created by" Nymrel by
+  // reference — self-attribution would misstate the relationship.
+  if (entity.nymrelAttribution === true) {
+    let host = '';
+    try {
+      host = new URL(entity.url).hostname.toLowerCase();
+    } catch {
+      host = '';
+    }
+    if (host === 'nymrel.com' || host.endsWith('.nymrel.com')) {
+      throw new MachineTrustConfigError(
+        'CONTRADICTORY_NYMREL_ATTRIBUTION',
+        `'entity.nymrelAttribution' contradicts the entity itself being a nymrel.com property (${entity.url}); owned properties are the attribution target, not its subject`
+      );
+    }
+  }
+
+  const seen = new Set<string>();
+  let node = entity.parentOrganization;
+  let depth = 0;
+  while (node !== undefined && node !== null) {
+    assertPlainObject(node);
+    if (typeof node.name !== 'string' || node.name.trim() === '') {
+      throw new MachineTrustConfigError(
+        'PARENT_ORGANIZATION_MALFORMED',
+        `'parentOrganization.name' must be a non-empty string at chain depth ${depth}`
+      );
+    }
+    if (typeof node.url !== 'string' || node.url.trim() === '') {
+      throw new MachineTrustConfigError(
+        'PARENT_ORGANIZATION_MALFORMED',
+        `'parentOrganization.url' must be a non-empty string at chain depth ${depth} ('${node.name}')`
+      );
+    }
+    const identity = `${node.name.trim()}|${node.url.trim()}`;
+    if (seen.has(identity)) {
+      throw new MachineTrustConfigError(
+        'PARENT_ORGANIZATION_CYCLE',
+        `Explicit parentOrganization chain contains a cycle at '${node.name}'`
+      );
+    }
+    seen.add(identity);
+    assertTruthfulParentIdentity(node.name.trim(), depth);
+    node = node.parentOrganization;
+    depth++;
+  }
+}
+
+/**
+ * Fails closed when an explicit parentOrganization node claims one of the
+ * canonical Nymrel identities as a *corporate parent*. 'Nymrel' is a studio
+ * brand whose legal entity is expressed via `legalName`, not a subsidiary with
+ * its own parent; built/partner properties attribute via
+ * `nymrelAttribution` (a bare creator `@id`) instead.
+ */
+function assertTruthfulParentIdentity(parentName: string, depth: number): void {
+  if (parentName === CANONICAL_NYMREL_ORG_NAME) {
+    throw new MachineTrustConfigError(
+      'PARENT_ORGANIZATION_MISSTATEMENT',
+      `'${CANONICAL_NYMREL_ORG_NAME}' cannot be declared as a corporate parent (chain depth ${depth}): it is the studio brand that BUILT this property. For built/partner attribution set entity.nymrelAttribution=true, which emits creator {"@id":"${NYMREL_ORGANIZATION_ID}"} by reference`
+    );
+  }
+  if (parentName === CANONICAL_LEGAL_NAME) {
+    throw new MachineTrustConfigError(
+      'PARENT_ORGANIZATION_MISSTATEMENT',
+      `'${CANONICAL_LEGAL_NAME}' cannot be declared as a separate corporate parent (chain depth ${depth}): it is already the legalName of the '${CANONICAL_NYMREL_ORG_NAME}' organization itself; minting it as a parent node asserts a false subsidiary chain. On Nymrel-operated properties set entity.legalName='${CANONICAL_LEGAL_NAME}' and omit parentOrganization`
+    );
+  }
 }
 
 /**
@@ -32,8 +159,10 @@ export function generateJsonLd(config: MachineTrustConfig): Record<string, any> 
   const graph: any[] = [];
   const entity = config.entity;
 
-  // 1. Organization Entity
-  const parentOrg = entity.parentOrganization || createDefaultParentHierarchy();
+  validateExplicitEntityRelationships(entity);
+
+  // 1. Organization Entity — explicit relationships only; nothing is implied.
+  const parentOrg = entity.parentOrganization;
 
   const buildParentOrgJson = (parent: ParentOrganizationConfig): any => {
     const obj: any = {
@@ -64,6 +193,13 @@ export function generateJsonLd(config: MachineTrustConfig): Record<string, any> 
   if (entity.telephone) organizationEntity.telephone = entity.telephone;
   if (entity.sameAs && entity.sameAs.length > 0) organizationEntity.sameAs = entity.sameAs;
   if (entity.foundingDate) organizationEntity.foundingDate = entity.foundingDate;
+
+  // Explicit attribution by reference: point at the canonical Nymrel node
+  // without rebuilding that organization inline in this graph.
+  if (entity.nymrelAttribution === true) {
+    organizationEntity.creator = { '@id': NYMREL_ORGANIZATION_ID };
+  }
+
   if (parentOrg) organizationEntity.parentOrganization = buildParentOrgJson(parentOrg);
 
   graph.push(organizationEntity);
@@ -233,11 +369,15 @@ export function validateJsonLdStructure(jsonLd: any): {
   } else {
     if (!org.name) errors.push("Organization missing 'name'");
     if (!org.url) errors.push("Organization missing 'url'");
-    if (!org.parentOrganization) {
-      warnings.push("Organization missing 'parentOrganization' for verifiable machine trust lineage");
-    } else {
-      const parent = org.parentOrganization;
-      if (!parent.name) warnings.push("parentOrganization missing 'name'");
+    // Absence of a corporate parent is truthful, not a finding. A declared
+    // parent that is structurally hollow is still flagged.
+    const parent = org.parentOrganization;
+    if (parent !== undefined && parent !== null) {
+      if (typeof parent !== 'object' || Array.isArray(parent)) {
+        warnings.push("'parentOrganization' must be an Organization object");
+      } else if (!parent.name) {
+        warnings.push("parentOrganization missing 'name'");
+      }
     }
   }
 
@@ -254,14 +394,7 @@ export function validateJsonLdStructure(jsonLd: any): {
   };
 }
 
-/**
- * Canonical Nymrel lineage names for verifiable machine trust:
- * the studio brand (intermediate) and the legal parent company (root).
- */
-export const CANONICAL_INTERMEDIATE_ORG_NAME = 'Nymrel';
-export const CANONICAL_ROOT_ORG_NAME = 'JalenBuilds LLC';
-
-/** A single structured finding from lineage validation */
+/** A single structured finding from canonical-relationship validation */
 export interface LineageIssue {
   /** Stable machine-readable code, safe to gate on in CI */
   code: string;
@@ -269,9 +402,9 @@ export interface LineageIssue {
   message: string;
 }
 
-/** Deterministic result of canonical lineage validation */
+/** Deterministic result of canonical relationship validation */
 export interface LineageValidationResult {
-  /** True only when the canonical Nymrel -> JalenBuilds LLC chain is intact */
+  /** True when the graph's Nymrel relationship (if any) is expressed truthfully */
   valid: boolean;
   errors: string[];
   warnings: string[];
@@ -296,9 +429,21 @@ function trimmedOrgName(node: any): string | undefined {
 }
 
 /**
- * Opt-in validator: checks that an existing JSON-LD graph carries the canonical
- * Nymrel -> JalenBuilds LLC parentOrganization lineage. Read-only — it never
+ * Opt-in validator: checks how a JSON-LD graph relates to the canonical Nymrel
+ * organization, per the truthful relationship model. Read-only — it never
  * rewrites the graph or asserts anything about deployments.
+ *
+ * Canonical model:
+ * - The Nymrel organization is ONE node (`name: 'Nymrel'`,
+ *   `legalName: 'JalenBuilds LLC'`, canonical `@id`
+ *   {@link NYMREL_ORGANIZATION_ID}). It has no corporate parent; expressing
+ *   JalenBuilds LLC as a separate parentOrganization node asserts a false
+ *   subsidiary chain.
+ * - Built/partner properties attribute via a bare creator reference,
+ *   `{ "@id": "https://nymrel.com/#organization" }` — the canonical node is
+ *   never rebuilt inline alongside the reference.
+ * - Generic sites with no Nymrel relationship are VALID with zero findings;
+ *   absence of attribution is truthful, not an error.
  *
  * Accepts either a full `{ @context, @graph }` document or a bare Organization
  * node. When multiple top-level Organization entities exist, the primary one is
@@ -306,10 +451,8 @@ function trimmedOrgName(node: any): string | undefined {
  * graph order). Names are matched exactly (whitespace-trimmed,
  * case-sensitive) against the canonical constants.
  *
- * Missing or incorrect intermediate ('Nymrel') and root ('JalenBuilds LLC')
- * organization nodes are errors; nesting beyond the canonical root is a
- * non-blocking warning. Generic structural validation remains available via
- * `validateJsonLdStructure`.
+ * Findings are stable, machine-readable issues suitable for CI gates. Generic
+ * structural validation remains available via `validateJsonLdStructure`.
  */
 export function validateNymrelLineage(jsonLd: any): LineageValidationResult {
   const issues: LineageIssue[] = [];
@@ -322,9 +465,11 @@ export function validateNymrelLineage(jsonLd: any): LineageValidationResult {
     return finalizeLineageResult(issues);
   }
 
+  let graphNodes: any[] = [jsonLd];
   let org: any;
   if (Array.isArray(jsonLd['@graph'])) {
-    const orgs = jsonLd['@graph'].filter(
+    graphNodes = jsonLd['@graph'];
+    const orgs = graphNodes.filter(
       (item: any) => isOrgNodeObject(item) && item['@type'] === 'Organization'
     );
     org =
@@ -346,62 +491,108 @@ export function validateNymrelLineage(jsonLd: any): LineageValidationResult {
     return finalizeLineageResult(issues);
   }
 
-  // Intermediate node: Nymrel
-  const intermediate = org.parentOrganization;
-  if (intermediate === undefined || intermediate === null) {
-    add(
-      'MISSING_PARENT_ORGANIZATION',
-      'error',
-      `Organization is missing 'parentOrganization' (expected intermediate '${CANONICAL_INTERMEDIATE_ORG_NAME}')`
-    );
-    return finalizeLineageResult(issues);
-  }
-  if (!isOrgNodeObject(intermediate)) {
-    add('MALFORMED_PARENT_NODE', 'error', "'parentOrganization' must be an Organization object");
-    return finalizeLineageResult(issues);
-  }
-  const intermediateName = trimmedOrgName(intermediate);
-  if (intermediateName !== CANONICAL_INTERMEDIATE_ORG_NAME) {
-    add(
-      'INCORRECT_INTERMEDIATE_NAME',
-      'error',
-      `Intermediate parentOrganization name ${JSON.stringify(intermediate.name)} does not match canonical '${CANONICAL_INTERMEDIATE_ORG_NAME}'`
-    );
+  // --- Collect every signal that ties this graph to the canonical Nymrel model.
+  const isSelfNymrel =
+    trimmedOrgName(org) === CANONICAL_NYMREL_ORG_NAME ||
+    org['@id'] === NYMREL_ORGANIZATION_ID;
+
+  const hasCreator = org.creator !== undefined && org.creator !== null;
+
+  // An inline rebuild is a full Organization node carrying the canonical @id in
+  // addition to (or instead of) the bare reference — allowed only when it IS
+  // the primary self-description (nymrel.com's own graph).
+  const inlineCanonicalNode = graphNodes.find(
+    (item: any) =>
+      isOrgNodeObject(item) && item['@type'] === 'Organization' &&
+      item['@id'] === NYMREL_ORGANIZATION_ID && item !== org
+  );
+
+  // Walk the declared parent chain (any depth), recording canonical identities.
+  const parentChainCanonicalNames: string[] = [];
+  let chainNode = org.parentOrganization;
+  while (chainNode !== undefined && chainNode !== null) {
+    const name = trimmedOrgName(chainNode);
+    if (name === CANONICAL_NYMREL_ORG_NAME || name === CANONICAL_LEGAL_NAME) {
+      parentChainCanonicalNames.push(name);
+    }
+    chainNode = isOrgNodeObject(chainNode) ? chainNode.parentOrganization : undefined;
   }
 
-  // Root node: JalenBuilds LLC
-  const root = intermediate.parentOrganization;
-  if (root === undefined || root === null) {
-    add(
-      'MISSING_ROOT_ORGANIZATION',
-      'error',
-      `Intermediate '${CANONICAL_INTERMEDIATE_ORG_NAME}' is missing its own 'parentOrganization' (expected root '${CANONICAL_ROOT_ORG_NAME}')`
-    );
+  const noRelationshipAtAll =
+    !isSelfNymrel && !hasCreator && parentChainCanonicalNames.length === 0;
+
+  // Generic site: nothing asserts a Nymrel relationship, and that is truthful.
+  // No lineage requirement is imposed on properties that never claim one.
+  if (noRelationshipAtAll) {
     return finalizeLineageResult(issues);
-  }
-  if (!isOrgNodeObject(root)) {
-    add(
-      'MALFORMED_PARENT_NODE',
-      'error',
-      "parentOrganization.parentOrganization must be an Organization object"
-    );
-    return finalizeLineageResult(issues);
-  }
-  const rootName = trimmedOrgName(root);
-  if (rootName !== CANONICAL_ROOT_ORG_NAME) {
-    add(
-      'INCORRECT_ROOT_NAME',
-      'error',
-      `Root parentOrganization name ${JSON.stringify(root.name)} does not match canonical '${CANONICAL_ROOT_ORG_NAME}'`
-    );
   }
 
-  if (root.parentOrganization !== undefined && root.parentOrganization !== null) {
-    add(
-      'UNEXPECTED_DEEPER_NESTING',
-      'warning',
-      `Canonical lineage ends at '${CANONICAL_ROOT_ORG_NAME}'; deeper parentOrganization nesting found`
-    );
+  // --- Self-description rules (the Nymrel organization describing itself).
+  if (isSelfNymrel) {
+    const legalName = typeof org.legalName === 'string' ? org.legalName.trim() : undefined;
+    if (legalName === undefined) {
+      add(
+        'MISSING_LEGAL_NAME',
+        'error',
+        `The '${CANONICAL_NYMREL_ORG_NAME}' organization must carry legalName '${CANONICAL_LEGAL_NAME}' so machines can verify the operating legal entity`
+      );
+    } else if (legalName !== CANONICAL_LEGAL_NAME) {
+      add(
+        'INCORRECT_LEGAL_NAME',
+        'error',
+        `The '${CANONICAL_NYMREL_ORG_NAME}' organization legalName ${JSON.stringify(org.legalName)} does not match canonical '${CANONICAL_LEGAL_NAME}'`
+      );
+    }
+
+    if (org.parentOrganization !== undefined && org.parentOrganization !== null) {
+      add(
+        'FALSE_SUBSIDIARY_CHAIN',
+        'error',
+        `'${CANONICAL_NYMREL_ORG_NAME}' declares a parentOrganization but has none: it is not a subsidiary. Express the legal entity as legalName '${CANONICAL_LEGAL_NAME}' on this same node and remove the parentOrganization chain`
+      );
+    }
+  }
+
+  // --- Attribution-by-reference rules (built/partner properties).
+  if (hasCreator) {
+    const creator = org.creator;
+    const validReference =
+      isOrgNodeObject(creator) &&
+      Object.keys(creator).length > 0 &&
+      creator['@id'] === NYMREL_ORGANIZATION_ID &&
+      Object.keys(creator).every((key) => key === '@id' || key === '@type');
+    if (!validReference) {
+      add(
+        'MALFORMED_CREATOR_REFERENCE',
+        'error',
+        `creator must be the bare reference {"@id":"${NYMREL_ORGANIZATION_ID}"}; rebuilt or altered creator nodes misstate the relationship`
+      );
+    }
+    if (inlineCanonicalNode) {
+      add(
+        'CANONICAL_NODE_REBUILT',
+        'error',
+        `Graph embeds a full Organization node for ${NYMREL_ORGANIZATION_ID} alongside a creator reference; attribute by @id only and do not rebuild the canonical organization inline`
+      );
+    }
+  }
+
+  // --- Parent-chain rules (canonical identities can never be parents).
+  for (const name of parentChainCanonicalNames) {
+    if (name === CANONICAL_NYMREL_ORG_NAME && !isSelfNymrel) {
+      add(
+        'PARENT_MISSTATEMENT',
+        'error',
+        `'${CANONICAL_NYMREL_ORG_NAME}' is listed as a corporate parent but it is the studio that BUILT this property. Use creator {"@id":"${NYMREL_ORGANIZATION_ID}"} (entity.nymrelAttribution=true) instead of a parentOrganization chain`
+      );
+    }
+    if (name === CANONICAL_LEGAL_NAME && !isSelfNymrel) {
+      add(
+        'PARENT_MISSTATEMENT',
+        'error',
+        `'${CANONICAL_LEGAL_NAME}' is listed as a separate corporate parent but it is already the legalName of the '${CANONICAL_NYMREL_ORG_NAME}' organization itself; minting it as a parent node asserts a false subsidiary chain`
+      );
+    }
   }
 
   return finalizeLineageResult(issues);

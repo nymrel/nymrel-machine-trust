@@ -13,13 +13,13 @@ From the repository root (build once if you haven't: `npm run build`):
 node bin/machine-trust.js generate -c examples/minimal-site/machine-trust.config.json -o examples/minimal-site/expected-output
 
 # 2. Audit the config against the rendered page and write the scorecard
-node bin/machine-trust.js audit -c examples/minimal-site/machine-trust.config.json --html examples/minimal-site/index.html --report examples/minimal-site/expected-output/MACHINE_TRUST_SCORECARD.md
+node bin/machine-trust.js audit -c examples/minimal-site/machine-trust.config.json --html examples/minimal-site/index.html --report examples/minimal-site/expected-output/MACHINE_TRUST_SCORECARD.md --fixed-timestamp 2026-08-23T16:00:00.000Z
 ```
 
 The audit exits `0` and scores this fixture **100/100 (Grade A+)** — 6 checks
 passed, 0 warnings, 0 failed. Every file in [`expected-output/`](./expected-output)
-is committed real CLI output, so you can diff your own run against it. The only
-line that will differ is the scorecard's `Generated:` timestamp.
+is committed real CLI output, so the fixed-time commands above can be diffed
+byte-for-byte across runs.
 
 ## What each file shows
 
@@ -33,9 +33,9 @@ line that will differ is the scorecard's `Generated:` timestamp.
 | `expected-output/answer-first-snippet.html` | The 47-word executive summary block ready to inject into SSR output. |
 | `expected-output/MACHINE_TRUST_SCORECARD.md` | The full 100-point audit report. |
 
-## Note on default lineage
+## Relationship behavior
 
-The generator injects a canonical `parentOrganization` chain
-(`Nymrel` → `JalenBuilds LLC`) when your `entity` does not define one — you can
-see it in `expected-output/jsonld.json`. To declare your own parent entity,
-set `entity.parentOrganization` in your config and that value is used instead.
+Aurora Notebooks is fictional and independent, so the generator emits no
+`parentOrganization` or Nymrel claim. A legitimate corporate parent must be
+supplied explicitly. A built or partner property can separately opt into the
+canonical Nymrel creator reference; it is never inferred from a URL or brand.

@@ -1,18 +1,17 @@
 # @nymrel/machine-trust
 
-> Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications. Generates, validates, and audits Schema.org JSON-LD entity graphs, standard /llms.txt machine indexes, AI search crawler policies, and DOM parity.
+> Generates and audits inspectable Schema.org JSON-LD, /llms.txt indexes, declared crawler policies, and supplied rendered-copy parity. Reports observable evidence and limitations; does not promise discovery outcomes.
 
 ## Core Modules
 
-- [JSON-LD Generator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/jsonLd.ts): Generates verifiable Schema.org graphs with Nymrel -> JalenBuilds LLC entity hierarchy.
+- [JSON-LD Generator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/jsonLd.ts): Generates Schema.org graphs from explicit relationships; optional Nymrel attribution uses a canonical creator reference.
 - [LLMs.txt Generator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/llmsTxt.ts): Builds token-budgeted /llms.txt and /llms-full.txt machine indexes.
-- [Robots.txt Engine](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/robotsTxt.ts): Establishes explicit discovery rules for OAI-SearchBot, PerplexityBot, and ClaudeBot.
-- [Answer-First Generator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/answerFirst.ts): Generates 40-60 word executive summaries for sub-second AI extraction.
-- [DOM Consistency Validator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/validators/domConsistency.ts): Verifies structured data parity with visible DOM copy to prevent penalties.
+- [Robots.txt Engine](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/robotsTxt.ts): Generates declared rules for named crawlers without asserting crawler behavior.
+- [Answer-First Generator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/answerFirst.ts): Generates and checks concise summary blocks.
+- [DOM Consistency Validator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/validators/domConsistency.ts): Reports differences between configured structured data and supplied HTML.
 - [Crawler Access Validator](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/validators/crawlerAccess.ts): Audits robots.txt rules for AI search crawler eligibility.
-- [Audit Scorecard Reporter](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/reporters/scorecard.ts): Produces 100-point composite Machine Trust Scorecards.
+- [Audit Scorecard Reporter](https://github.com/nymrel/nymrel-machine-trust/blob/main/src/reporters/scorecard.ts): Produces reproducible scorecards when given a fixed timestamp.
 
-## Optional & Umbrella Context
+## Company context
 
-- [Nymrel Umbrella](https://nymrel.com): Autonomous software systems and digital services portfolio.
-- [JalenBuilds LLC](https://nymrel.com): Parent venture studio holding company.
+- [Nymrel](https://nymrel.com): Company services, products, and proof. Nymrel's legal name is JalenBuilds LLC.

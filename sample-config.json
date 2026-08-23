@@ -1,136 +1,106 @@
 {
-  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "entity": {
-    "name": "Nymrel Machine Trust",
-    "legalName": "Nymrel Machine Trust (a JalenBuilds LLC product)",
-    "url": "https://machine-trust.nymrel.com",
-    "logo": "https://machine-trust.nymrel.com/logo.png",
-    "description": "Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications.",
+    "name": "Nymrel",
+    "legalName": "JalenBuilds LLC",
+    "url": "https://nymrel.com/",
+    "logo": "https://nymrel.com/logo.png",
+    "description": "Nymrel builds and runs products, services, websites, software, and apps.",
     "email": "contact@nymrel.com",
-    "parentOrganization": {
-      "name": "Nymrel",
-      "legalName": "Nymrel (a JalenBuilds LLC company)",
-      "url": "https://nymrel.com",
-      "description": "Autonomous software systems and digital services umbrella.",
-      "parentOrganization": {
-        "name": "JalenBuilds LLC",
-        "legalName": "JalenBuilds LLC",
-        "url": "https://nymrel.com",
-        "description": "Parent holding company and technical venture studio."
-      }
-    },
     "sameAs": [
-      "https://github.com/nymrel/nymrel-machine-trust"
+      "https://github.com/nymrel"
     ]
   },
   "product": {
     "name": "@nymrel/machine-trust",
-    "description": "Enterprise TypeScript library and CLI that generates, validates, and audits Dual-Audience machine trust and AI search discoverability.",
+    "description": "A TypeScript library and CLI that generates and audits machine-readable web evidence.",
     "brand": "Nymrel",
-    "url": "https://machine-trust.nymrel.com",
+    "url": "https://github.com/nymrel/nymrel-machine-trust",
     "category": "DeveloperApplication",
-    "offers": [
-      {
-        "price": "0.00",
-        "priceCurrency": "USD",
-        "availability": "InStock",
-        "url": "https://machine-trust.nymrel.com/pricing"
-      }
-    ],
     "softwareApplication": {
       "applicationCategory": "DeveloperApplication",
-      "operatingSystem": "Cross-platform (Node.js >= 18)",
+      "operatingSystem": "Cross-platform (Node.js 18 or newer)",
       "features": [
-        "Schema.org JSON-LD parent entity graphs",
-        "Standard /llms.txt and /llms-full.txt generation",
-        "AI Search crawler robots.txt policies (OAI-SearchBot, PerplexityBot)",
-        "40-60 word Answer-First executive summary blocks",
-        "Structured data vs rendered DOM parity validation",
-        "100-point composite Machine Trust Scorecard"
+        "Schema.org JSON-LD generation from explicit entity relationships",
+        "llms.txt and llms-full.txt generation",
+        "AI-search crawler policy generation",
+        "Answer-first summary checks",
+        "Structured-data and rendered-copy parity checks",
+        "Deterministic audit scorecards"
       ]
     }
   },
   "faqs": [
     {
-      "question": "What is the Dual-Audience Rule?",
-      "answer": "Every modern web application must deliver visually stunning UX for human visitors AND verifiable machine trust (JSON-LD entity graphs, llms.txt, AI search crawlers) for autonomous AI purchasing agents."
+      "question": "What does Machine Trust inspect?",
+      "answer": "It checks structured data, machine-readable indexes, crawler rules, answer-first summaries, and rendered-copy parity against the configuration supplied by the operator."
     },
     {
-      "question": "Why is parentOrganization hierarchy essential in Schema.org?",
-      "answer": "AI reasoning engines and autonomous purchasing agents verify company legitimacy and trust by traversing the cryptographic and schema entity graph back to the parent legal entity (JalenBuilds LLC)."
+      "question": "Does Machine Trust invent an ownership hierarchy?",
+      "answer": "No. Generic sites receive no corporate parent. Explicit caller-supplied relationships are validated, and built or partner properties may credit Nymrel by canonical creator reference."
     }
   ],
   "breadcrumbs": [
     {
-      "name": "Home",
-      "item": "https://machine-trust.nymrel.com"
+      "name": "Nymrel",
+      "item": "https://nymrel.com"
     },
     {
-      "name": "Documentation",
-      "item": "https://machine-trust.nymrel.com/docs"
-    },
-    {
-      "name": "CLI Guide",
-      "item": "https://machine-trust.nymrel.com/docs/cli"
+      "name": "Machine Trust source",
+      "item": "https://github.com/nymrel/nymrel-machine-trust"
     }
   ],
   "llmsTxt": {
-    "title": "Nymrel Machine Trust Documentation for Autonomous AI Agents",
-    "summary": "Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications.",
+    "title": "Nymrel Machine Trust",
+    "summary": "Machine Trust generates and audits machine-readable web evidence without inventing ownership, performance, or discovery outcomes.",
     "sections": [
       {
-        "title": "Core Modules",
-        "description": "Primary TypeScript generators and validators for machine trust.",
+        "title": "Core modules",
+        "description": "Generators and validators for inspectable web evidence.",
         "links": [
           {
-            "title": "JSON-LD Entity Graph Generator",
-            "url": "https://machine-trust.nymrel.com/docs/jsonld",
-            "description": "Builds Schema.org graphs with Nymrel -> JalenBuilds LLC lineage."
+            "title": "JSON-LD generator",
+            "url": "https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/jsonLd.ts",
+            "description": "Builds Schema.org graphs from explicit configuration and canonical creator references."
           },
           {
-            "title": "LLMs.txt Generator",
-            "url": "https://machine-trust.nymrel.com/docs/llms-txt",
-            "description": "Creates token-budgeted /llms.txt and /llms-full.txt machine index files."
+            "title": "Machine index generator",
+            "url": "https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/llmsTxt.ts",
+            "description": "Creates token-budgeted llms.txt and llms-full.txt files."
           },
           {
-            "title": "Robots.txt Crawler Rules",
-            "url": "https://machine-trust.nymrel.com/docs/robots-txt",
-            "description": "Configures explicit rules for OAI-SearchBot, PerplexityBot, and training bots."
+            "title": "Crawler policy generator",
+            "url": "https://github.com/nymrel/nymrel-machine-trust/blob/main/src/generators/robotsTxt.ts",
+            "description": "Creates declared crawler rules that remain subject to each crawler's behavior."
           },
           {
-            "title": "DOM Parity Validator",
-            "url": "https://machine-trust.nymrel.com/docs/dom-parity",
-            "description": "Guarantees zero discrepancy between JSON-LD structured data and visible DOM copy."
+            "title": "DOM parity validator",
+            "url": "https://github.com/nymrel/nymrel-machine-trust/blob/main/src/validators/domConsistency.ts",
+            "description": "Reports observable differences between configured structured data and supplied HTML."
           }
         ]
       }
     ],
     "optionalLinks": [
       {
-        "title": "Nymrel Umbrella",
+        "title": "Nymrel",
         "url": "https://nymrel.com",
-        "description": "Autonomous software systems portfolio."
-      },
-      {
-        "title": "JalenBuilds LLC",
-        "url": "https://nymrel.com",
-        "description": "Parent venture studio holding company."
+        "description": "Company services, products, and proof."
       }
     ],
     "tokenBudget": 4000
   },
   "robotsTxt": {
-    "sitemapUrl": "https://machine-trust.nymrel.com/sitemap.xml",
-    "host": "machine-trust.nymrel.com",
+    "sitemapUrl": "https://nymrel.com/sitemap.xml",
+    "host": "nymrel.com",
     "posture": "allow_ai_search_disallow_training"
   },
   "answerFirst": {
-    "summary": "Nymrel Machine Trust is an open-source TypeScript library and CLI that equips modern web applications with Dual-Audience discoverability by generating verifiable Schema.org entity graphs, standard llms.txt machine indexes, and AI search crawler policies to ensure instant retrieval by autonomous AI purchasing agents.",
+    "summary": "Nymrel Machine Trust is a TypeScript library and CLI for generating structured data, machine-readable indexes, and declared crawler rules, then checking those artifacts against supplied configuration and rendered HTML. Its reports describe observable evidence and limitations; they do not promise rankings, traffic, citations, recommendations, or revenue.",
     "keyTakeaways": [
-      "Automated Schema.org entity hierarchy linking Nymrel to JalenBuilds LLC",
-      "Explicit robots.txt access for OAI-SearchBot, PerplexityBot, and ClaudeBot",
-      "Pre-rendered 40-60 word Answer-First executive summaries",
-      "Automated DOM parity verification preventing search mismatch penalties"
+      "Entity relationships come only from explicit configuration",
+      "Nymrel attribution uses a canonical creator reference",
+      "Fixed timestamps make audit scorecards reproducible",
+      "Reports describe eligibility and consistency rather than discovery outcomes"
     ]
   }
 }

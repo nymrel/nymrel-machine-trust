@@ -1,0 +1,7 @@
+# Halcyon Coffee Roasters
+
+> A fictional coffee roaster specimen for deterministic Machine Trust audit testing.
+
+## Products
+
+- [Dawn Blend](https://halcyon-coffee.example/dawn-blend): Fictional medium-roast coffee, USD 18.00, marked in stock.

@@ -49,6 +49,9 @@ Dual-Audience Machine Trust & AI Search Discoverability Engine
   -o, --outDir <dir>         Output directory for generated files (default: ./public)
   --html <file>              HTML file to test for DOM consistency
   --report <file>            Output path for audit scorecard (default: ./MACHINE_TRUST_SCORECARD.md)
+  --fixed-timestamp <iso>    Record this ISO-8601 timestamp in the scorecard instead of the
+                             current time; identical runs become byte-identical. Also settable
+                             via MACHINE_TRUST_FIXED_TIMESTAMP (flag takes precedence).
   -v, --version              Show version
 
 \x1b[1mEXAMPLES:\x1b[0m
@@ -87,66 +90,51 @@ async function main() {
   const outDir = getOpt('-o', '--outDir', './public');
   const htmlPath = getOpt(null, '--html', null);
   const reportPath = getOpt(null, '--report', './MACHINE_TRUST_SCORECARD.md');
+  // Deterministic runs: explicit flag wins over MACHINE_TRUST_FIXED_TIMESTAMP;
+  // when neither is set the engine records the current time (default behavior).
+  const fixedTimestamp =
+    getOpt(null, '--fixed-timestamp', null) ?? process.env.MACHINE_TRUST_FIXED_TIMESTAMP ?? undefined;
 
   if (command === 'init') {
     const targetFile = args[1] || './machine-trust.config.json';
     const sampleConfig = {
       entity: {
-        name: 'Nymrel Project',
-        legalName: 'Nymrel Project (a JalenBuilds LLC product)',
-        url: 'https://example.nymrel.com',
-        logo: 'https://example.nymrel.com/logo.png',
-        description: 'Autonomous high-performance web platform built under the Nymrel umbrella.',
-        email: 'contact@nymrel.com',
-        parentOrganization: {
-          name: 'Nymrel',
-          legalName: 'Nymrel (a JalenBuilds LLC company)',
-          url: 'https://nymrel.com',
-          description: 'Autonomous software systems and digital services umbrella.',
-          parentOrganization: {
-            name: 'JalenBuilds LLC',
-            legalName: 'JalenBuilds LLC',
-            url: 'https://nymrel.com',
-            description: 'Parent holding company and technical venture studio.',
-          },
-        },
+        name: 'Your Business',
+        legalName: 'Your Business LLC',
+        url: 'https://www.yourbusiness.example',
+        logo: 'https://www.yourbusiness.example/logo.png',
+        description: 'Describe what your business offers in one clear sentence.',
+        email: 'hello@yourbusiness.example',
       },
       product: {
-        name: 'Nymrel Flagship App',
-        description: 'High-performance AI-search ready SaaS platform.',
-        brand: 'Nymrel',
-        url: 'https://example.nymrel.com',
-        category: 'SoftwareApplication',
-        offers: [
-          {
-            price: '49.00',
-            priceCurrency: 'USD',
-            availability: 'InStock',
-          },
-        ],
-        softwareApplication: {
-          applicationCategory: 'BusinessApplication',
-          operatingSystem: 'All',
-          features: ['AI Search Ready', 'Dual-Audience Machine Trust', 'Sub-second SSR'],
+        name: 'Your Flagship Product',
+      description: 'One concrete sentence a buyer can verify on the page.',
+      brand: 'Your Business',
+      url: 'https://www.yourbusiness.example/product',
+      category: 'SoftwareApplication',
+      softwareApplication: {
+        applicationCategory: 'BusinessApplication',
+        operatingSystem: 'All',
+        features: ['Structured data generation', 'Machine index generation', 'Crawler policy generation'],
         },
       },
       llmsTxt: {
-        title: 'Nymrel Project Documentation for AI Agents',
-        summary:
-          'Nymrel Project provides modern autonomous digital infrastructure with full Dual-Audience machine trust compliance.',
+      title: 'Your Business Documentation for AI Agents',
+      summary:
+        'Describe the public facts and documentation that automated systems may inspect.',
         sections: [
           {
             title: 'Core Architecture',
             links: [
               {
                 title: 'Machine Trust Standard',
-                url: 'https://example.nymrel.com/docs/trust',
-                description: 'Verifiable parent entity hierarchy and schema specifications.',
+                url: 'https://www.yourbusiness.example/docs/trust',
+                description: 'Entity graph, structured data, and schema specifications.',
               },
               {
                 title: 'API Reference',
-                url: 'https://example.nymrel.com/docs/api',
-                description: 'Autonomous purchasing and programmatic data interfaces.',
+                url: 'https://www.yourbusiness.example/docs/api',
+                description: 'Programmatic and data interfaces.',
               },
             ],
           },
@@ -154,17 +142,17 @@ async function main() {
         tokenBudget: 4000,
       },
       robotsTxt: {
-        sitemapUrl: 'https://example.nymrel.com/sitemap.xml',
-        host: 'example.nymrel.com',
+        sitemapUrl: 'https://www.yourbusiness.example/sitemap.xml',
+        host: 'www.yourbusiness.example',
         posture: 'allow_ai_search_disallow_training',
       },
       answerFirst: {
-        summary:
-          'Nymrel Project is an enterprise-grade AI search discovery and machine trust platform that links autonomous digital services to verifiable corporate entity hierarchies for instant AI purchasing agent discovery.',
-        keyTakeaways: [
-          'Dual-Audience JSON-LD entity graph with JalenBuilds LLC parent organization',
-          'Curated /llms.txt and /llms-full.txt machine index',
-          'Explicit AI search bot crawler permissions for OAI-SearchBot and Perplexity',
+      summary:
+        'Your Business publishes structured data, a machine-readable index, and declared crawler rules that match the public page supplied for audit. Replace this starter text with verified facts, then inspect the generated evidence and limitations before publishing it.',
+      keyTakeaways: [
+        'Entity relationships come from explicit configuration only',
+        'Machine index content should match public documentation',
+        'Crawler rules express policy but do not prove indexing',
         ],
       },
     };
@@ -241,7 +229,7 @@ async function main() {
       }
     }
 
-    const scorecard = engine.runMachineTrustAudit(config, sampleHtml);
+    const scorecard = engine.runMachineTrustAudit(config, sampleHtml, { fixedTimestamp });
     console.log(engine.formatCliReport(scorecard));
 
     if (command === 'audit') {

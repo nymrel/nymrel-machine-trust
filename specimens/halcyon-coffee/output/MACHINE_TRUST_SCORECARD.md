@@ -1,7 +1,7 @@
 # Machine Trust & Dual-Audience Audit Scorecard
 
-> **Entity:** Aurora Notebooks
-> **Audit Score:** **100 / 100** (Grade: **A+**)
+> **Entity:** Halcyon Coffee Roasters
+> **Audit Score:** **94 / 100** (Grade: **A**)
 > **Generated:** 2026-08-23T16:00:00.000Z
 > **Engine:** `@nymrel/machine-trust` v1.0.0
 
@@ -9,8 +9,8 @@
 
 | Status | Count | Benchmark Target |
 | :--- | :--- | :--- |
-| Passed | **6** | Total |
-| Warnings | **0** | 0 |
+| Passed | **5** | Total |
+| Warnings | **1** | 0 |
 | Failed | **0** | 0 |
 
 ## Audit Breakdown
@@ -19,9 +19,9 @@
 | :--- | :--- | :---: | :---: | :--- |
 | **ENTITY_GRAPH** | Schema.org JSON-LD Syntactic Integrity | PASS | 100/100 | Valid Schema.org graph generated with @context and @graph. |
 | **ENTITY_GRAPH** | Explicit Entity Relationship Validation | PASS | 100/100 | No corporate parent declared; the organization stands alone and no lineage is asserted. |
-| **LLMS_TXT** | LLMs.txt Token Budget & Sectioning | PASS | 100/100 | Structured /llms.txt within budget (118/4000 estimated tokens). |
+| **LLMS_TXT** | LLMs.txt Token Budget & Sectioning | PASS | 100/100 | Structured /llms.txt within budget (61/1000 estimated tokens). |
 | **ROBOTS_TXT** | Declared AI Search Crawler Policy | PASS | 100/100 | Generated rules declare access for OAI-SearchBot, PerplexityBot, and ClaudeBot; actual crawling and indexing are not measured. |
-| **ANSWER_FIRST** | Answer-First 40-60 Word Length | PASS | 100/100 | Answer-first block length is optimal (47 words). |
+| **ANSWER_FIRST** | Answer-First 40-60 Word Length | WARN | 60/100 | Answer-first text is too brief (19 words). Recommended range: 40-60 words for optimal AI crawler retrieval. |
 | **DOM_CONSISTENCY** | Structured Data vs Rendered DOM Parity | PASS | 100/100 | JSON-LD fields match visible DOM content without drift. |
 
 ## Dual-Audience Compliance Doctrine

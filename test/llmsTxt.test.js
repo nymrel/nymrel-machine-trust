@@ -10,7 +10,7 @@ import {
 describe('LLMs.txt & LLMs-Full.txt Generator', () => {
   const sampleLlmsConfig = {
     title: 'Nymrel Machine Trust Suite',
-    summary: 'Autonomous AI search discoverability and verifiable entity graph generator.',
+    summary: 'Machine-readable index and explicit entity graph generator.',
     sections: [
       {
         title: 'Core Tools',
@@ -19,7 +19,7 @@ describe('LLMs.txt & LLMs-Full.txt Generator', () => {
           {
             title: 'JSON-LD Engine',
             url: 'https://nymrel.com/docs/jsonld',
-            description: 'Generates Schema.org graphs with verified parent hierarchy.',
+            description: 'Generates Schema.org graphs from explicit relationships.',
           },
           {
             title: 'Robots.txt Engine',
@@ -42,7 +42,7 @@ describe('LLMs.txt & LLMs-Full.txt Generator', () => {
   test('generates valid markdown structure for /llms.txt', () => {
     const text = generateLlmsTxt(sampleLlmsConfig);
     assert.ok(text.startsWith('# Nymrel Machine Trust Suite'));
-    assert.ok(text.includes('> Autonomous AI search discoverability'));
+    assert.ok(text.includes('> Machine-readable index'));
     assert.ok(text.includes('## Core Tools'));
     assert.ok(text.includes('- [JSON-LD Engine](https://nymrel.com/docs/jsonld): Generates Schema.org graphs'));
     assert.ok(text.includes('## Optional'));

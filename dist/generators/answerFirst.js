@@ -43,7 +43,7 @@ export function generateAnswerFirstHtml(config) {
         takeawaysHtml = `\n    <ul class="mt-takeaways">\n${listItems}\n    </ul>`;
     }
     const badgeHtml = entityName
-        ? `\n    <div class="mt-badge" data-trust-entity="${escapeHtml(entityName)}">Verified Machine Trust by ${escapeHtml(entityName)}</div>`
+        ? `\n    <div class="mt-badge" data-trust-entity="${escapeHtml(entityName)}">Machine-readable summary for ${escapeHtml(entityName)}</div>`
         : '';
     return `<aside class="machine-trust-answer-first" data-machine-trust="answer-first" role="region" aria-label="Executive Summary">
   <div class="mt-answer-container">

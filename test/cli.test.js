@@ -68,6 +68,7 @@ describe('CLI smoke tests', () => {
 
   test('audit loads the compiled engine and scores a config end-to-end', (t) => {
     const sandbox = makeTempCwd(t);
+    const fixedTimestamp = '2026-08-23T16:00:00.000Z';
 
     // Self-contained fixture: exercises the dynamic import of dist/index.js,
     // which must work on Windows where bare absolute paths are invalid ESM
@@ -106,6 +107,7 @@ describe('CLI smoke tests', () => {
       '--config', './machine-trust.config.json',
       '--html', './index.html',
       '--report', './MACHINE_TRUST_SCORECARD.md',
+      '--fixed-timestamp', fixedTimestamp,
     ], { cwd: sandbox, encoding: 'utf8' });
 
     assert.strictEqual(result.error, undefined);
@@ -114,5 +116,50 @@ describe('CLI smoke tests', () => {
     assert.match(result.stdout, /0 Failed/);
     const report = fs.readFileSync(path.join(sandbox, 'MACHINE_TRUST_SCORECARD.md'), 'utf8');
     assert.match(report, /Audit Score:/);
+    assert.match(report, new RegExp(fixedTimestamp.replaceAll('.', '\\.')));
+
+    const second = spawnSync(process.execPath, [
+      binPath,
+      'audit',
+      '--config', './machine-trust.config.json',
+      '--html', './index.html',
+      '--report', './SECOND_SCORECARD.md',
+      '--fixed-timestamp', fixedTimestamp,
+    ], { cwd: sandbox, encoding: 'utf8' });
+
+    assert.strictEqual(second.status, 0);
+    assert.strictEqual(
+      fs.readFileSync(path.join(sandbox, 'SECOND_SCORECARD.md'), 'utf8'),
+      report,
+      'fixed-time audit output must be byte-identical across runs'
+    );
+  });
+
+  test('audit fails closed on an invalid fixed timestamp', (t) => {
+    const sandbox = makeTempCwd(t);
+    const config = {
+      entity: {
+        name: 'Timestamp Test',
+        url: 'https://timestamp.example',
+        description: 'A fictional configuration for fixed timestamp validation.',
+      },
+    };
+    fs.writeFileSync(
+      path.join(sandbox, 'machine-trust.config.json'),
+      JSON.stringify(config),
+      'utf8'
+    );
+
+    const result = spawnSync(process.execPath, [
+      binPath,
+      'audit',
+      '--config', './machine-trust.config.json',
+      '--report', './SHOULD_NOT_EXIST.md',
+      '--fixed-timestamp', 'not-a-timestamp',
+    ], { cwd: sandbox, encoding: 'utf8' });
+
+    assert.strictEqual(result.status, 1);
+    assert.match(result.stderr, /INVALID_FIXED_TIMESTAMP/);
+    assert.strictEqual(fs.existsSync(path.join(sandbox, 'SHOULD_NOT_EXIST.md')), false);
   });
 });
