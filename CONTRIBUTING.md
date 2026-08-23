@@ -12,8 +12,8 @@ Thank you for your interest in contributing to `@nymrel/machine-trust`.
 
 1. Clone the repository:
    ```bash
-   git clone https://github.com/nymrel/machine-trust.git
-   cd machine-trust
+   git clone https://github.com/nymrel/nymrel-machine-trust.git
+   cd nymrel-machine-trust
    ```
 
 2. Install dependencies:
