@@ -1,7 +1,6 @@
-"use strict";
 /**
  * Types for @nymrel/machine-trust
  * Dual-Audience Machine Trust & AI Search Discoverability Engine
  */
-Object.defineProperty(exports, "__esModule", { value: true });
+export {};
 //# sourceMappingURL=types.js.map

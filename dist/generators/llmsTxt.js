@@ -1,13 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.estimateTokens = estimateTokens;
-exports.generateLlmsTxt = generateLlmsTxt;
-exports.generateLlmsFullTxt = generateLlmsFullTxt;
-exports.parseLlmsTxt = parseLlmsTxt;
 /**
  * Estimates token count using standard GPT/LLM heuristic (~4 characters per token or 0.75 words)
  */
-function estimateTokens(text) {
+export function estimateTokens(text) {
     if (!text)
         return 0;
     // A blend of character length and word count for accurate markdown token estimation
@@ -19,7 +13,7 @@ function estimateTokens(text) {
 /**
  * Generates standard /llms.txt markdown string
  */
-function generateLlmsTxt(config) {
+export function generateLlmsTxt(config) {
     const lines = [];
     // Title (H1)
     lines.push(`# ${config.title}`);
@@ -79,7 +73,7 @@ function generateLlmsTxt(config) {
 /**
  * Generates /llms-full.txt including extended technical documentation or inlined context
  */
-function generateLlmsFullTxt(config) {
+export function generateLlmsFullTxt(config) {
     const baseLlms = generateLlmsTxt(config);
     const lines = [baseLlms, '---', '', '## Comprehensive Documentation & Machine Index', ''];
     if (config.fullContent) {
@@ -107,7 +101,7 @@ function generateLlmsFullTxt(config) {
 /**
  * Parses an existing llms.txt file into structured data
  */
-function parseLlmsTxt(content) {
+export function parseLlmsTxt(content) {
     const lines = content.split('\n');
     let title = '';
     const summaryLines = [];

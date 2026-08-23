@@ -1,7 +1,4 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.formatCliReport = formatCliReport;
-function formatCliReport(scorecard) {
+export function formatCliReport(scorecard) {
     const lines = [];
     const gradeColor = scorecard.grade.startsWith('A')
         ? '\x1b[32m' // Green

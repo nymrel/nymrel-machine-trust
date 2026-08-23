@@ -2,8 +2,8 @@
   "name": "@nymrel/machine-trust",
   "version": "1.0.0",
   "description": "Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications",
+  "type": "module",
   "main": "./dist/index.js",
-  "module": "./dist/index.mjs",
   "types": "./dist/index.d.ts",
   "bin": {
     "machine-trust": "./bin/machine-trust.js"

@@ -1,12 +1,8 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.isPathAllowed = isPathAllowed;
-exports.auditCrawlerAccess = auditCrawlerAccess;
-const robotsTxt_js_1 = require("../generators/robotsTxt.js");
+import { parseRobotsTxt, KNOWN_AI_BOTS } from '../generators/robotsTxt.js';
 /**
  * Checks if a specific path is allowed for a given bot in parsed robots.txt rules
  */
-function isPathAllowed(parsed, botName, path) {
+export function isPathAllowed(parsed, botName, path) {
     // Find rule matching the exact bot name (case-insensitive) or wildcard '*'
     const botKey = Object.keys(parsed.rules).find((k) => k.toLowerCase() === botName.toLowerCase());
     const rule = botKey ? parsed.rules[botKey] : parsed.rules['*'];
@@ -35,8 +31,8 @@ function isPathAllowed(parsed, botName, path) {
 /**
  * Performs a comprehensive AI crawler access audit against robots.txt
  */
-function auditCrawlerAccess(robotsTxtContent) {
-    const parsed = (0, robotsTxt_js_1.parseRobotsTxt)(robotsTxtContent);
+export function auditCrawlerAccess(robotsTxtContent) {
+    const parsed = parseRobotsTxt(robotsTxtContent);
     const results = [];
     const targetBots = [
         'OAI-SearchBot',
@@ -52,7 +48,7 @@ function auditCrawlerAccess(robotsTxtContent) {
     for (const bot of targetBots) {
         for (const testPath of testPaths) {
             const access = isPathAllowed(parsed, bot, testPath);
-            const isSearchBot = robotsTxt_js_1.KNOWN_AI_BOTS.SEARCH.includes(bot);
+            const isSearchBot = KNOWN_AI_BOTS.SEARCH.includes(bot);
             if (isSearchBot && !access.allowed) {
                 searchBotFailures++;
             }

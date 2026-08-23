@@ -1,17 +1,11 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.KNOWN_AI_BOTS = void 0;
-exports.getRulesForPosture = getRulesForPosture;
-exports.generateRobotsTxt = generateRobotsTxt;
-exports.parseRobotsTxt = parseRobotsTxt;
-exports.KNOWN_AI_BOTS = {
+export const KNOWN_AI_BOTS = {
     SEARCH: ['OAI-SearchBot', 'PerplexityBot', 'ClaudeBot', 'Googlebot', 'Bingbot', 'Applebot'],
     TRAINING: ['GPTBot', 'Google-Extended', 'anthropic-ai', 'Applebot-Extended', 'CCBot', 'cohere-ai', 'Diffbot', 'Bytespider'],
 };
 /**
  * Builds standard bot rules based on posture
  */
-function getRulesForPosture(posture = 'allow_ai_search_disallow_training') {
+export function getRulesForPosture(posture = 'allow_ai_search_disallow_training') {
     switch (posture) {
         case 'allow_ai_search_disallow_training':
             return [
@@ -55,7 +49,7 @@ function getRulesForPosture(posture = 'allow_ai_search_disallow_training') {
 /**
  * Generates formatted robots.txt string
  */
-function generateRobotsTxt(config = {}) {
+export function generateRobotsTxt(config = {}) {
     const lines = [];
     lines.push('# ==============================================================================');
     lines.push('# Robots.txt with Explicit AI Search & Machine Trust Rules');
@@ -117,7 +111,7 @@ function generateRobotsTxt(config = {}) {
 /**
  * Parses existing robots.txt into structured rule matrix
  */
-function parseRobotsTxt(content) {
+export function parseRobotsTxt(content) {
     const lines = content.split('\n');
     const result = {
         sitemaps: [],

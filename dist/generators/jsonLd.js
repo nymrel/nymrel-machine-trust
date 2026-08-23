@@ -1,15 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.CANONICAL_ROOT_ORG_NAME = exports.CANONICAL_INTERMEDIATE_ORG_NAME = void 0;
-exports.createDefaultParentHierarchy = createDefaultParentHierarchy;
-exports.generateJsonLd = generateJsonLd;
-exports.generateJsonLdScriptTag = generateJsonLdScriptTag;
-exports.validateJsonLdStructure = validateJsonLdStructure;
-exports.validateNymrelLineage = validateNymrelLineage;
 /**
  * Creates canonical Nymrel -> JalenBuilds LLC parent organization hierarchy
  */
-function createDefaultParentHierarchy() {
+export function createDefaultParentHierarchy() {
     return {
         name: 'Nymrel',
         legalName: 'Nymrel (a JalenBuilds LLC company)',
@@ -26,7 +18,7 @@ function createDefaultParentHierarchy() {
 /**
  * Builds Schema.org JSON-LD @graph matching Dual-Audience machine trust specifications
  */
-function generateJsonLd(config) {
+export function generateJsonLd(config) {
     const graph = [];
     const entity = config.entity;
     // 1. Organization Entity
@@ -195,7 +187,7 @@ function generateJsonLd(config) {
 /**
  * Formats JSON-LD graph into an HTML <script type="application/ld+json"> tag
  */
-function generateJsonLdScriptTag(config, options = {}) {
+export function generateJsonLdScriptTag(config, options = {}) {
     const data = generateJsonLd(config);
     const jsonString = options.minify ? JSON.stringify(data) : JSON.stringify(data, null, 2);
     return `<script type="application/ld+json">\n${jsonString}\n</script>`;
@@ -203,7 +195,7 @@ function generateJsonLdScriptTag(config, options = {}) {
 /**
  * Validates JSON-LD graph structure according to Dual-Audience standards
  */
-function validateJsonLdStructure(jsonLd) {
+export function validateJsonLdStructure(jsonLd) {
     const errors = [];
     const warnings = [];
     if (!jsonLd || typeof jsonLd !== 'object') {
@@ -251,8 +243,8 @@ function validateJsonLdStructure(jsonLd) {
  * Canonical Nymrel lineage names for verifiable machine trust:
  * the studio brand (intermediate) and the legal parent company (root).
  */
-exports.CANONICAL_INTERMEDIATE_ORG_NAME = 'Nymrel';
-exports.CANONICAL_ROOT_ORG_NAME = 'JalenBuilds LLC';
+export const CANONICAL_INTERMEDIATE_ORG_NAME = 'Nymrel';
+export const CANONICAL_ROOT_ORG_NAME = 'JalenBuilds LLC';
 function finalizeLineageResult(issues) {
     return {
         valid: !issues.some((issue) => issue.severity === 'error'),
@@ -283,7 +275,7 @@ function trimmedOrgName(node) {
  * non-blocking warning. Generic structural validation remains available via
  * `validateJsonLdStructure`.
  */
-function validateNymrelLineage(jsonLd) {
+export function validateNymrelLineage(jsonLd) {
     const issues = [];
     const add = (code, severity, message) => {
         issues.push({ code, severity, message });
@@ -312,7 +304,7 @@ function validateNymrelLineage(jsonLd) {
     // Intermediate node: Nymrel
     const intermediate = org.parentOrganization;
     if (intermediate === undefined || intermediate === null) {
-        add('MISSING_PARENT_ORGANIZATION', 'error', `Organization is missing 'parentOrganization' (expected intermediate '${exports.CANONICAL_INTERMEDIATE_ORG_NAME}')`);
+        add('MISSING_PARENT_ORGANIZATION', 'error', `Organization is missing 'parentOrganization' (expected intermediate '${CANONICAL_INTERMEDIATE_ORG_NAME}')`);
         return finalizeLineageResult(issues);
     }
     if (!isOrgNodeObject(intermediate)) {
@@ -320,13 +312,13 @@ function validateNymrelLineage(jsonLd) {
         return finalizeLineageResult(issues);
     }
     const intermediateName = trimmedOrgName(intermediate);
-    if (intermediateName !== exports.CANONICAL_INTERMEDIATE_ORG_NAME) {
-        add('INCORRECT_INTERMEDIATE_NAME', 'error', `Intermediate parentOrganization name ${JSON.stringify(intermediate.name)} does not match canonical '${exports.CANONICAL_INTERMEDIATE_ORG_NAME}'`);
+    if (intermediateName !== CANONICAL_INTERMEDIATE_ORG_NAME) {
+        add('INCORRECT_INTERMEDIATE_NAME', 'error', `Intermediate parentOrganization name ${JSON.stringify(intermediate.name)} does not match canonical '${CANONICAL_INTERMEDIATE_ORG_NAME}'`);
     }
     // Root node: JalenBuilds LLC
     const root = intermediate.parentOrganization;
     if (root === undefined || root === null) {
-        add('MISSING_ROOT_ORGANIZATION', 'error', `Intermediate '${exports.CANONICAL_INTERMEDIATE_ORG_NAME}' is missing its own 'parentOrganization' (expected root '${exports.CANONICAL_ROOT_ORG_NAME}')`);
+        add('MISSING_ROOT_ORGANIZATION', 'error', `Intermediate '${CANONICAL_INTERMEDIATE_ORG_NAME}' is missing its own 'parentOrganization' (expected root '${CANONICAL_ROOT_ORG_NAME}')`);
         return finalizeLineageResult(issues);
     }
     if (!isOrgNodeObject(root)) {
@@ -334,11 +326,11 @@ function validateNymrelLineage(jsonLd) {
         return finalizeLineageResult(issues);
     }
     const rootName = trimmedOrgName(root);
-    if (rootName !== exports.CANONICAL_ROOT_ORG_NAME) {
-        add('INCORRECT_ROOT_NAME', 'error', `Root parentOrganization name ${JSON.stringify(root.name)} does not match canonical '${exports.CANONICAL_ROOT_ORG_NAME}'`);
+    if (rootName !== CANONICAL_ROOT_ORG_NAME) {
+        add('INCORRECT_ROOT_NAME', 'error', `Root parentOrganization name ${JSON.stringify(root.name)} does not match canonical '${CANONICAL_ROOT_ORG_NAME}'`);
     }
     if (root.parentOrganization !== undefined && root.parentOrganization !== null) {
-        add('UNEXPECTED_DEEPER_NESTING', 'warning', `Canonical lineage ends at '${exports.CANONICAL_ROOT_ORG_NAME}'; deeper parentOrganization nesting found`);
+        add('UNEXPECTED_DEEPER_NESTING', 'warning', `Canonical lineage ends at '${CANONICAL_ROOT_ORG_NAME}'; deeper parentOrganization nesting found`);
     }
     return finalizeLineageResult(issues);
 }

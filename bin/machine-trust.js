@@ -12,20 +12,19 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-// Helper to load either src or dist depending on execution environment
+// Load the compiled engine from dist. There is no source fallback: shipping
+// builds are produced by `npm run build` (tsc) and the CLI fails closed with an
+// actionable error rather than attempting to load TypeScript sources at runtime.
 async function loadEngine() {
   const distPath = path.resolve(__dirname, '../dist/index.js');
-  const srcPath = path.resolve(__dirname, '../src/index.js');
 
-  if (fs.existsSync(distPath)) {
-    return await import(distPath);
+  if (!fs.existsSync(distPath)) {
+    console.error(`\x1b[31m[✖] Build output not found: ${distPath}\x1b[0m`);
+    console.error(`The machine-trust engine ships compiled to ./dist. Run \`npm run build\` in the package root, then retry.`);
+    process.exit(1);
   }
-  // Try direct ts/js loader or fallback
-  try {
-    return await import(srcPath);
-  } catch (e) {
-    throw new Error(`Failed to load engine from dist (${distPath}) or src (${srcPath}): ${e.message}`);
-  }
+
+  return await import(distPath);
 }
 
 function printUsage() {

@@ -1,21 +1,17 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.runMachineTrustAudit = runMachineTrustAudit;
-exports.generateMarkdownScorecard = generateMarkdownScorecard;
-const jsonLd_js_1 = require("../generators/jsonLd.js");
-const llmsTxt_js_1 = require("../generators/llmsTxt.js");
-const robotsTxt_js_1 = require("../generators/robotsTxt.js");
-const answerFirst_js_1 = require("../generators/answerFirst.js");
-const crawlerAccess_js_1 = require("../validators/crawlerAccess.js");
-const domConsistency_js_1 = require("../validators/domConsistency.js");
+import { generateJsonLd, validateJsonLdStructure } from '../generators/jsonLd.js';
+import { generateLlmsTxt, estimateTokens } from '../generators/llmsTxt.js';
+import { generateRobotsTxt } from '../generators/robotsTxt.js';
+import { validateWordCount } from '../generators/answerFirst.js';
+import { auditCrawlerAccess } from '../validators/crawlerAccess.js';
+import { verifyDomConsistency } from '../validators/domConsistency.js';
 /**
  * Executes a full Machine Trust audit across all 5 dimensions
  */
-function runMachineTrustAudit(config, sampleHtml) {
+export function runMachineTrustAudit(config, sampleHtml) {
     const checks = [];
     // 1. Entity Graph Checks
-    const jsonLd = (0, jsonLd_js_1.generateJsonLd)(config);
-    const jsonLdValidation = (0, jsonLd_js_1.validateJsonLdStructure)(jsonLd);
+    const jsonLd = generateJsonLd(config);
+    const jsonLdValidation = validateJsonLdStructure(jsonLd);
     if (jsonLdValidation.valid) {
         checks.push({
             id: 'ENTITY_JSONLD_SYNTAX',
@@ -64,8 +60,8 @@ function runMachineTrustAudit(config, sampleHtml) {
     }
     // 2. LLMs.txt Checks
     if (config.llmsTxt) {
-        const llmsTxtContent = (0, llmsTxt_js_1.generateLlmsTxt)(config.llmsTxt);
-        const tokens = (0, llmsTxt_js_1.estimateTokens)(llmsTxtContent);
+        const llmsTxtContent = generateLlmsTxt(config.llmsTxt);
+        const tokens = estimateTokens(llmsTxtContent);
         const budget = config.llmsTxt.tokenBudget || 4000;
         if (tokens <= budget) {
             checks.push({
@@ -102,8 +98,8 @@ function runMachineTrustAudit(config, sampleHtml) {
         });
     }
     // 3. Robots.txt Crawler Access Checks
-    const robotsTxtContent = (0, robotsTxt_js_1.generateRobotsTxt)(config.robotsTxt);
-    const crawlerAudit = (0, crawlerAccess_js_1.auditCrawlerAccess)(robotsTxtContent);
+    const robotsTxtContent = generateRobotsTxt(config.robotsTxt);
+    const crawlerAudit = auditCrawlerAccess(robotsTxtContent);
     if (crawlerAudit.overallEligible) {
         checks.push({
             id: 'ROBOTS_AI_SEARCH_ACCESS',
@@ -128,7 +124,7 @@ function runMachineTrustAudit(config, sampleHtml) {
     }
     // 4. Answer-First Summary Block Checks
     if (config.answerFirst) {
-        const wordCheck = (0, answerFirst_js_1.validateWordCount)(config.answerFirst.summary, config.answerFirst.wordCountRange || [40, 60]);
+        const wordCheck = validateWordCount(config.answerFirst.summary, config.answerFirst.wordCountRange || [40, 60]);
         if (wordCheck.valid) {
             checks.push({
                 id: 'ANSWER_FIRST_WORD_COUNT',
@@ -165,7 +161,7 @@ function runMachineTrustAudit(config, sampleHtml) {
     }
     // 5. DOM Consistency Check
     if (sampleHtml) {
-        const domResult = (0, domConsistency_js_1.verifyDomConsistency)(jsonLd, sampleHtml);
+        const domResult = verifyDomConsistency(jsonLd, sampleHtml);
         if (domResult.consistent) {
             checks.push({
                 id: 'DOM_STRUCTURED_DATA_PARITY',
@@ -242,7 +238,7 @@ function runMachineTrustAudit(config, sampleHtml) {
 /**
  * Generates a GitHub-flavored Markdown audit scorecard
  */
-function generateMarkdownScorecard(scorecard) {
+export function generateMarkdownScorecard(scorecard) {
     const lines = [];
     lines.push(`# Machine Trust & Dual-Audience Audit Scorecard`);
     lines.push('');

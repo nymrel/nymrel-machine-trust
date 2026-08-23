@@ -1,13 +1,7 @@
-"use strict";
-Object.defineProperty(exports, "__esModule", { value: true });
-exports.extractTextFromHtml = extractTextFromHtml;
-exports.normalizeText = normalizeText;
-exports.extractPrices = extractPrices;
-exports.verifyDomConsistency = verifyDomConsistency;
 /**
  * Strips HTML tags and normalizes whitespace
  */
-function extractTextFromHtml(html) {
+export function extractTextFromHtml(html) {
     // Remove script and style tags and their contents
     let clean = html.replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, ' ');
     clean = clean.replace(/<style\b[^<]*(?:(?!<\/style>)<[^<]*)*<\/style>/gi, ' ');
@@ -27,7 +21,7 @@ function extractTextFromHtml(html) {
 /**
  * Normalizes text for comparison (lowercase, trimmed, collapsed whitespace, punctuation simplified)
  */
-function normalizeText(text) {
+export function normalizeText(text) {
     if (!text)
         return '';
     return text
@@ -40,14 +34,14 @@ function normalizeText(text) {
 /**
  * Extracts prices from text (e.g., "$49", "49.00", "USD 49", "0.00", "Free")
  */
-function extractPrices(text) {
+export function extractPrices(text) {
     const matches = text.match(/(?:\$|€|£|USD\s*|EUR\s*|GBP\s*)?\b\d+(?:\.\d{2})?\b|\bfree\b/gi) || [];
     return matches.map((m) => m.toLowerCase().trim());
 }
 /**
  * Verifies that structured data in JSON-LD matches rendered visible DOM text
  */
-function verifyDomConsistency(jsonLd, html) {
+export function verifyDomConsistency(jsonLd, html) {
     const visibleText = extractTextFromHtml(html);
     const normalizedDom = normalizeText(visibleText);
     const checks = [];

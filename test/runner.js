@@ -9,5 +9,6 @@ import './robotsTxt.test.js';
 import './answerFirst.test.js';
 import './domConsistency.test.js';
 import './crawlerAccess.test.js';
+import './cli.test.js';
 
 console.log('\n[✓] Loaded all @nymrel/machine-trust test suites.\n');
