@@ -203,12 +203,14 @@ export function runMachineTrustAudit(config, sampleHtml, options) {
     }
     // 4. Answer-First Summary Block Checks
     if (config.answerFirst) {
-        const wordCheck = validateWordCount(config.answerFirst.summary, config.answerFirst.wordCountRange || [40, 60]);
+        const wordCountRange = config.answerFirst.wordCountRange || [40, 60];
+        const wordCountTitle = `Answer-First ${wordCountRange[0]}-${wordCountRange[1]} Word Length`;
+        const wordCheck = validateWordCount(config.answerFirst.summary, wordCountRange);
         if (wordCheck.valid) {
             checks.push({
                 id: 'ANSWER_FIRST_WORD_COUNT',
                 category: 'ANSWER_FIRST',
-                title: 'Answer-First 40-60 Word Length',
+                title: wordCountTitle,
                 status: 'PASS',
                 score: 100,
                 weight: 15,
@@ -219,7 +221,7 @@ export function runMachineTrustAudit(config, sampleHtml, options) {
             checks.push({
                 id: 'ANSWER_FIRST_WORD_COUNT',
                 category: 'ANSWER_FIRST',
-                title: 'Answer-First 40-60 Word Length',
+                title: wordCountTitle,
                 status: 'WARN',
                 score: 60,
                 weight: 15,

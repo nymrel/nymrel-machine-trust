@@ -39,6 +39,40 @@ describe('CLI smoke tests', () => {
     assert.deepStrictEqual(fs.readdirSync(cwd), []);
   });
 
+  test('init creates a self-consistent template and refuses silent overwrite', (t) => {
+    const cwd = makeTempCwd(t);
+    const target = path.join(cwd, 'machine-trust.config.json');
+
+    const created = spawnSync(process.execPath, [binPath, 'init'], { cwd, encoding: 'utf8' });
+    assert.strictEqual(created.status, 0);
+
+    const template = JSON.parse(fs.readFileSync(target, 'utf8'));
+    const wordCount = template.answerFirst.summary.trim().split(/\s+/).length;
+    assert.ok(wordCount >= 40 && wordCount <= 60, `starter summary has ${wordCount} words`);
+
+    fs.writeFileSync(target, '{"preserve":true}\n', 'utf8');
+    const refused = spawnSync(process.execPath, [binPath, 'init'], { cwd, encoding: 'utf8' });
+    assert.strictEqual(refused.status, 1);
+    assert.match(refused.stderr, /Refusing to overwrite existing config/);
+    assert.strictEqual(fs.readFileSync(target, 'utf8'), '{"preserve":true}\n');
+
+    const forced = spawnSync(process.execPath, [binPath, 'init', '--force'], { cwd, encoding: 'utf8' });
+    assert.strictEqual(forced.status, 0);
+    assert.strictEqual(JSON.parse(fs.readFileSync(target, 'utf8')).entity.name, 'Your Business');
+  });
+
+  test('malformed config JSON fails without a stack trace or partial output', (t) => {
+    const cwd = makeTempCwd(t);
+    fs.writeFileSync(path.join(cwd, 'machine-trust.config.json'), '{invalid', 'utf8');
+
+    const result = spawnSync(process.execPath, [binPath, 'validate'], { cwd, encoding: 'utf8' });
+
+    assert.strictEqual(result.status, 1);
+    assert.match(result.stderr, /Invalid JSON in config/);
+    assert.doesNotMatch(result.stderr, /at JSON\.parse/);
+    assert.deepStrictEqual(fs.readdirSync(cwd), ['machine-trust.config.json']);
+  });
+
   test('fails closed with an actionable build error when dist is missing', (t) => {
     const sandbox = makeTempCwd(t);
 

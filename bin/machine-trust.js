@@ -38,7 +38,7 @@ Dual-Audience Machine Trust & AI Search Discoverability Engine
   machine-trust <command> [options]
 
 \x1b[1mCOMMANDS:\x1b[0m
-  \x1b[32minit\x1b[0m [path]                  Generate a starter machine-trust.config.json template
+  \x1b[32minit\x1b[0m [path] [--force]        Generate a starter machine-trust.config.json template
   \x1b[32mgenerate\x1b[0m [options]           Generate JSON-LD, llms.txt, robots.txt, and answer-first blocks
   \x1b[32mvalidate\x1b[0m [options]           Validate JSON-LD, crawler eligibility, and DOM parity
   \x1b[32maudit\x1b[0m [options]              Run comprehensive 100-point audit and output Markdown scorecard
@@ -52,6 +52,7 @@ Dual-Audience Machine Trust & AI Search Discoverability Engine
   --fixed-timestamp <iso>    Record this ISO-8601 timestamp in the scorecard instead of the
                              current time; identical runs become byte-identical. Also settable
                              via MACHINE_TRUST_FIXED_TIMESTAMP (flag takes precedence).
+  --force                    Allow init to replace an existing target file
   -v, --version              Show version
 
 \x1b[1mEXAMPLES:\x1b[0m
@@ -94,9 +95,11 @@ async function main() {
   // when neither is set the engine records the current time (default behavior).
   const fixedTimestamp =
     getOpt(null, '--fixed-timestamp', null) ?? process.env.MACHINE_TRUST_FIXED_TIMESTAMP ?? undefined;
+  const force = args.includes('--force');
 
   if (command === 'init') {
-    const targetFile = args[1] || './machine-trust.config.json';
+    const targetFile = args.slice(1).find((arg) => !arg.startsWith('-')) || './machine-trust.config.json';
+    const fullTargetPath = path.resolve(process.cwd(), targetFile);
     const sampleConfig = {
       entity: {
         name: 'Your Business',
@@ -148,7 +151,7 @@ async function main() {
       },
       answerFirst: {
       summary:
-        'Your Business publishes structured data, a machine-readable index, and declared crawler rules that match the public page supplied for audit. Replace this starter text with verified facts, then inspect the generated evidence and limitations before publishing it.',
+        'Your Business publishes structured data, a machine-readable index, and declared crawler rules that match the public page supplied for audit. Replace this starter text with verified facts, confirm entity relationships and contact details, then inspect every generated artifact, score, warning, and limitation before publishing it publicly.',
       keyTakeaways: [
         'Entity relationships come from explicit configuration only',
         'Machine index content should match public documentation',
@@ -157,7 +160,13 @@ async function main() {
       },
     };
 
-    fs.writeFileSync(path.resolve(process.cwd(), targetFile), JSON.stringify(sampleConfig, null, 2), 'utf8');
+    if (fs.existsSync(fullTargetPath) && !force) {
+      console.error(`\x1b[31m[✖] Refusing to overwrite existing config: ${fullTargetPath}\x1b[0m`);
+      console.error('Choose a different path or re-run init with --force after reviewing the existing file.');
+      process.exit(1);
+    }
+
+    fs.writeFileSync(fullTargetPath, JSON.stringify(sampleConfig, null, 2), 'utf8');
     console.log(`\x1b[32m[✓] Generated sample config at: ${targetFile}\x1b[0m`);
     process.exit(0);
   }
@@ -173,7 +182,15 @@ async function main() {
     process.exit(1);
   }
 
-  const config = JSON.parse(fs.readFileSync(fullConfigPath, 'utf8'));
+  let config;
+  try {
+    config = JSON.parse(fs.readFileSync(fullConfigPath, 'utf8'));
+  } catch (error) {
+    const reason = error instanceof Error ? error.message : String(error);
+    console.error(`\x1b[31m[✖] Invalid JSON in config: ${fullConfigPath}\x1b[0m`);
+    console.error(reason);
+    process.exit(1);
+  }
 
   if (command === 'generate') {
     const fullOutDir = path.resolve(process.cwd(), outDir);

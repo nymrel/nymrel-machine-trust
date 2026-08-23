@@ -49,4 +49,29 @@ describe('Audit scorecard evidence boundaries', () => {
     assert.match(relationship.message, /Incorrect Legal Entity/);
     assert.ok(scorecard.failCount > 0);
   });
+
+  test('reports the configured answer-first word-count range in the check title', () => {
+    const scorecard = runMachineTrustAudit(
+      {
+        entity: {
+          name: 'Range Example',
+          url: 'https://range.example',
+          description: 'A fictional custom-range configuration.',
+        },
+        robotsTxt: { posture: 'allow_ai_search_disallow_training' },
+        answerFirst: {
+          summary: 'Five clear words only today.',
+          wordCountRange: [5, 7],
+        },
+      },
+      undefined,
+      { fixedTimestamp }
+    );
+    const wordCount = scorecard.checks.find(
+      (check) => check.id === 'ANSWER_FIRST_WORD_COUNT'
+    );
+
+    assert.strictEqual(wordCount.status, 'PASS');
+    assert.strictEqual(wordCount.title, 'Answer-First 5-7 Word Length');
+  });
 });
