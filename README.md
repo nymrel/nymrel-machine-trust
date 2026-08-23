@@ -1,149 +1,102 @@
 # @nymrel/machine-trust
 
-> **Dual-Audience Machine Trust & AI Search Discoverability Engine for Modern Web Applications**
-
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
-[![Dual-Audience](https://img.shields.io/badge/Machine%20Trust-Verified-emerald)](https://nymrel.com)
+[![Node](https://img.shields.io/badge/node-%E2%89%A518-green)](https://nodejs.org)
 
-`@nymrel/machine-trust` is an enterprise TypeScript library and CLI engine that equips modern web applications with verifiable **Dual-Audience Machine Trust** and AI search discoverability. It automates Schema.org JSON-LD entity graphs, standard `/llms.txt` and `/llms-full.txt` machine indexes, AI crawler policies (`OAI-SearchBot`, `PerplexityBot`, `ClaudeBot`), and sub-second Answer-First executive summaries with zero DOM drift.
-
----
-
-## The Dual-Audience Doctrine
-
-Modern web applications must cater to two distinct audiences simultaneously:
-1. **Human Visitors:** Visually stunning UX, rapid render times, high conversion design, and accessibility.
-2. **Autonomous AI Agents & Search Engines:** Cryptographically verifiable machine trust, transparent entity hierarchy (`parentOrganization: Nymrel -> JalenBuilds LLC`), token-budgeted `/llms.txt` indexes, and zero discrepancy between rendered DOM and structured schema.
-
-```
-                    ┌────────────────────────┐
-                    │    JalenBuilds LLC     │  (Parent Legal Entity)
-                    └───────────┬────────────┘
-                                │
-                    ┌───────────▼────────────┐
-                    │   Nymrel Umbrella      │  (Operating Umbrella)
-                    └───────────┬────────────┘
-                                │
-          ┌─────────────────────┴─────────────────────┐
-          ▼                                           ▼
-┌───────────────────────────┐               ┌───────────────────────────┐
-│     Human Audience        │               │   Autonomous AI Agents    │
-│  - Warm Aesthetics        │               │  - Schema.org Graph       │
-│  - Sub-second SSR         │               │  - /llms.txt Machine Index│
-│  - Responsive Flow        │               │  - OAI-SearchBot Access   │
-│  - Visible Pricing Copy   │               │  - DOM Parity Validation  │
-└───────────────────────────┘               └───────────────────────────┘
-```
+Your site has two audiences: the people who visit it and the AI agents that read it, and both have to be able to trust every surface they touch. A price in your structured data must match the price on the page, and an agent must be able to verify who is behind the site before it quotes or recommends you. `@nymrel/machine-trust` generates that machine-readable layer — Schema.org JSON-LD entity graphs, `/llms.txt` indexes, robots.txt rules for AI search crawlers — and then audits your built pages to prove nothing drifted out of sync.
 
 ---
 
-## Key Features
+## 60-second quickstart
 
-- 🏛️ **Verifiable Schema.org JSON-LD Graph Generator:** Automatically crafts connected entity graphs for `Organization`, `WebSite`, `Product`, `Offer`, `SoftwareApplication`, `FAQPage`, and `BreadcrumbList` with canonical `parentOrganization` lineage.
-- 🤖 **Standard `/llms.txt` & `/llms-full.txt` Engine:** Generates token-budgeted machine indexes allowing frontier models to ingest your architecture without context overflow.
-- 🛡️ **Explicit AI Search Bot `robots.txt` Policies:** Pre-configured postures enabling discovery crawlers (`OAI-SearchBot`, `PerplexityBot`, `ClaudeBot`, `Googlebot`) while cleanly blocking aggressive model scrapers if desired.
-- ⚡ **40-60 Word Answer-First Block Injector:** Injects executive summary snippets into HTML/SSR to satisfy instant question-answering heuristics of AI search engines.
-- 🔍 **DOM Structured Data Consistency Validator:** Audits your rendered HTML to ensure prices, entity names, descriptions, and stock statuses in JSON-LD match visible DOM text, preventing search mismatch penalties.
-- 📊 **100-Point Machine Trust Scorecard & CLI:** Terminal reporter and Markdown auditor evaluating overall machine trust readiness.
+```bash
+# 1. Install
+npm install -D @nymrel/machine-trust
+
+# 2. Create a starter config, then generate the machine-readable assets
+npx machine-trust init
+npx machine-trust generate --outDir ./public
+
+# 3. Audit your built page against its structured data
+npx machine-trust audit --config ./machine-trust.config.json --html ./dist/index.html
+```
+
+The audit prints a scorecard in your terminal and writes
+`MACHINE_TRUST_SCORECARD.md` next to your config. Exit code is `0` when every
+check passes and `1` otherwise, so it drops straight into CI.
+
+A complete worked example — fixture site, config, and committed expected
+output — lives in [`examples/minimal-site`](./examples/minimal-site).
+
+---
+
+## What it checks
+
+| Check | What it verifies | Weight |
+| :--- | :--- | :---: |
+| **JSON-LD entity graph** | Valid Schema.org `@graph` (Organization, WebSite, Product/Offer) with a verifiable `parentOrganization` lineage | 30 pts |
+| **llms.txt** | Structured `/llms.txt` and `/llms-full.txt` machine indexes within their token budget | 15 pts |
+| **AI crawler access** | `robots.txt` explicitly permits discovery crawlers (`OAI-SearchBot`, `PerplexityBot`, `ClaudeBot`) | 20 pts |
+| **Answer-first summary** | A 40–60 word executive summary block that answers the core question up front | 15 pts |
+| **DOM drift** | Prices, names, and descriptions in JSON-LD match the visible rendered text — zero drift | 20 pts |
+
+Total: 100 points, graded A+ through F. Not covered yet: canonical URL and
+Open Graph tag validation.
 
 ---
 
 ## Installation
 
 ```bash
-# Using npm
-npm install @nymrel/machine-trust
-
-# Using pnpm
-pnpm add @nymrel/machine-trust
-
-# Using yarn
-yarn add @nymrel/machine-trust
+npm install @nymrel/machine-trust   # or pnpm add / yarn add
 ```
 
----
+Requires Node.js >= 18.
 
-## CLI Usage
+## CLI
 
-`@nymrel/machine-trust` includes a powerful standalone CLI:
-
-```bash
-# 1. Initialize a starter configuration
-npx machine-trust init
-
-# 2. Generate all assets (jsonld.json, llms.txt, robots.txt, answer-first block)
-npx machine-trust generate --outDir ./public
-
-# 3. Validate existing build artifacts and DOM parity
-npx machine-trust validate --config ./machine-trust.config.json --html ./dist/index.html
-
-# 4. Run a full 100-point audit and generate MACHINE_TRUST_SCORECARD.md
-npx machine-trust audit --config ./machine-trust.config.json --html ./dist/index.html --report ./MACHINE_TRUST_SCORECARD.md
+```
+machine-trust init [path]        Generate a starter machine-trust.config.json
+machine-trust generate           Write jsonld.json, llms.txt, llms-full.txt,
+  [-o dir]                         robots.txt, and the answer-first snippet
+machine-trust validate           Print the scorecard without writing a report
+  [-c file] [--html file]
+machine-trust audit              Validate and write MACHINE_TRUST_SCORECARD.md
+  [-c file] [--html file]         (--report overrides the output path)
+  [--report file]
 ```
 
----
+## Programmatic API
 
-## Programmatic API Reference
-
-### 1. Schema.org JSON-LD Generation
+### Schema.org JSON-LD generation
 
 ```typescript
 import { generateJsonLd, generateJsonLdScriptTag } from '@nymrel/machine-trust';
 
-const config = {
-  entity: {
-    name: 'Nymrel Service',
-    legalName: 'Nymrel Service (a JalenBuilds LLC company)',
-    url: 'https://service.nymrel.com',
-    description: 'Autonomous cloud workflow engine.',
-    email: 'contact@nymrel.com',
-    parentOrganization: {
-      name: 'Nymrel',
-      legalName: 'Nymrel (a JalenBuilds LLC company)',
-      url: 'https://nymrel.com',
-      parentOrganization: {
-        name: 'JalenBuilds LLC',
-        legalName: 'JalenBuilds LLC',
-        url: 'https://nymrel.com'
-      }
-    }
-  },
-  product: {
-    name: 'Workflow Pro',
-    description: 'High-throughput automation runner.',
-    offers: {
-      price: '29.00',
-      priceCurrency: 'USD',
-      availability: 'InStock'
-    }
-  }
-};
-
-// Returns raw Schema.org @graph object
-const jsonLdGraph = generateJsonLd(config);
-
-// Returns <script type="application/ld+json">...</script> string for SSR
-const scriptTag = generateJsonLdScriptTag(config, { minify: true });
+const jsonLdGraph = generateJsonLd(config);            // raw @graph object
+const scriptTag = generateJsonLdScriptTag(config, { minify: true }); // SSR-ready <script> string
 ```
 
-### 2. `/llms.txt` & `/llms-full.txt` Generation
+When `entity.parentOrganization` is omitted, a default lineage chain is
+injected (see [`examples/minimal-site`](./examples/minimal-site)); set your own
+`parentOrganization` to override it. `validateNymrelLineage(graph)` checks any
+existing graph against that canonical chain and returns deterministic,
+machine-readable issues suitable for CI gates.
+
+### /llms.txt generation
 
 ```typescript
-import { generateLlmsTxt, generateLlmsFullTxt } from '@nymrel/machine-trust';
+import { generateLlmsTxt, generateLlmsFullTxt, parseLlmsTxt } from '@nymrel/machine-trust';
 
 const llmsTxt = generateLlmsTxt({
-  title: 'Nymrel Service Documentation',
-  summary: 'Autonomous cloud workflow engine with verified machine trust.',
+  title: 'Acme Documentation',
+  summary: 'What this site does, in one paragraph.',
   sections: [
     {
-      title: 'API Endpoints',
+      title: 'Products',
       links: [
-        {
-          title: 'Purchasing Interface',
-          url: 'https://service.nymrel.com/api/buy',
-          description: 'Autonomous agent checkout endpoint.'
-        }
+        { title: 'Widget Pro', url: 'https://acme.example/widget', description: 'Price, stock, specs.' }
       ]
     }
   ],
@@ -151,85 +104,81 @@ const llmsTxt = generateLlmsTxt({
 });
 ```
 
-### 3. AI Search `robots.txt` Generation
+### robots.txt policies
 
 ```typescript
-import { generateRobotsTxt } from '@nymrel/machine-trust';
+import { generateRobotsTxt, parseRobotsTxt, auditCrawlerAccess } from '@nymrel/machine-trust';
 
 const robotsTxt = generateRobotsTxt({
-  sitemapUrl: 'https://service.nymrel.com/sitemap.xml',
-  host: 'service.nymrel.com',
-  posture: 'allow_ai_search_disallow_training' // Permits OAI-SearchBot & Perplexity, restricts scrapers
+  sitemapUrl: 'https://acme.example/sitemap.xml',
+  host: 'acme.example',
+  posture: 'allow_ai_search_disallow_training' // also: allow_all | restrict_training_only | deny_all
 });
 ```
 
-### 4. Answer-First SSR Summary Block
+### Answer-first summary block
 
 ```typescript
 import { generateAnswerFirstHtml, injectAnswerFirstBlock } from '@nymrel/machine-trust';
 
-const htmlSnippet = generateAnswerFirstHtml({
-  summary: 'Nymrel Service provides real-time autonomous cloud orchestration with verified parent entity lineage to JalenBuilds LLC, enabling AI agents to query APIs and transact automatically.',
-  entityName: 'Nymrel',
-  keyTakeaways: [
-    'Sub-50ms execution latency',
-    'Verifiable Schema.org entity hierarchy',
-    'OpenAI OAI-SearchBot indexing enabled'
-  ]
-});
-
-// Or inject directly into SSR HTML stream
-const fullHtml = injectAnswerFirstBlock(rawHtml, {
-  summary: 'Nymrel Service provides real-time autonomous cloud orchestration...',
-  entityName: 'Nymrel'
+const html = injectAnswerFirstBlock(rawHtml, {
+  summary: 'A 40-60 word answer to the core question your page resolves.',
+  entityName: 'Acme'
 });
 ```
 
-### 5. DOM Structured Data Consistency Validation
+Injection order: explicit `<!-- MACHINE_TRUST_ANSWER_FIRST -->` placeholder,
+then `targetSelector`, then after `</h1>`, then after `<main>`/`<body>`.
+
+### DOM drift validation
 
 ```typescript
 import { verifyDomConsistency } from '@nymrel/machine-trust';
 
-const validation = verifyDomConsistency(jsonLdGraph, renderedHtml);
-
-if (!validation.consistent) {
-  console.error('DOM Mismatch detected:', validation.checks);
-} else {
-  console.log(`DOM Parity Score: ${validation.score}/100`);
-}
+const result = verifyDomConsistency(jsonLdGraph, renderedHtml);
+// result.consistent, result.score (0-100), result.checks[]
 ```
 
----
+### Full audit
 
-## Framework Integration Recipes
+```typescript
+import { runMachineTrustAudit, formatCliReport, generateMarkdownScorecard } from '@nymrel/machine-trust';
 
-### Next.js (App Router `app/layout.tsx`)
+const scorecard = runMachineTrustAudit(config, renderedHtml);
+console.log(formatCliReport(scorecard));
+fs.writeFileSync('MACHINE_TRUST_SCORECARD.md', generateMarkdownScorecard(scorecard));
+```
+
+## Framework integration
+
+### Next.js (App Router)
 
 ```tsx
-import { generateJsonLdScriptTag, generateAnswerFirstHtml } from '@nymrel/machine-trust';
+import { generateJsonLd } from '@nymrel/machine-trust';
 import { machineTrustConfig } from '@/config/machine-trust';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const jsonLdScript = generateJsonLdScriptTag(machineTrustConfig);
+  const jsonLd = generateJsonLd(machineTrustConfig);
 
   return (
     <html lang="en">
-      <head>
-        <div dangerouslySetInnerHTML={{ __html: jsonLdScript }} />
-      </head>
       <body>
         {children}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
       </body>
     </html>
   );
 }
 ```
 
-### Astro (`src/layouts/Layout.astro`)
+### Astro
 
 ```astro
 ---
-import { generateJsonLd, generateAnswerFirstHtml } from '@nymrel/machine-trust';
+import { generateJsonLd } from '@nymrel/machine-trust';
 import { siteConfig } from '../site.config';
 
 const jsonLd = generateJsonLd(siteConfig);
@@ -245,24 +194,19 @@ const jsonLd = generateJsonLd(siteConfig);
 </html>
 ```
 
----
+## Development
 
-## 100-Point Machine Trust Scorecard Benchmark
+```bash
+npm install       # deps are pinned in package.json
+npm run build     # tsc -> dist/
+npm test          # node:test suite via test/runner.js
+npm run lint      # tsc --noEmit
+```
 
-When running `machine-trust audit`, your site is scored against the Nymrel 100-point benchmark:
-
-| Category | Target Criteria | Weight |
-| :--- | :--- | :---: |
-| **Entity Graph** | Valid Schema.org `@graph` + nested `parentOrganization` (Nymrel -> JalenBuilds LLC) | 30 pts |
-| **LLMs.txt** | Categorized `/llms.txt` + `/llms-full.txt` under strict token budget | 15 pts |
-| **Robots.txt** | Explicit `OAI-SearchBot`, `PerplexityBot`, and `ClaudeBot` discovery permissions | 20 pts |
-| **Answer-First** | 40-60 word executive summary block answering core user intent | 15 pts |
-| **DOM Parity** | 100% price, entity, description, and currency consistency with visible HTML | 20 pts |
-
----
+See [CONTRIBUTING.md](./CONTRIBUTING.md) for principles and workflow.
 
 ## Governance & License
 
-- **Entity Owner:** Nymrel / JalenBuilds LLC
+- **Maintained by:** Nymrel
 - **Contact:** `contact@nymrel.com`
 - **License:** MIT (see [LICENSE](./LICENSE))
