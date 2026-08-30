@@ -1,4 +1,4 @@
-import { MachineTrustConfig, OrganizationConfig, ParentOrganizationConfig } from '../types.js';
+import type { MachineTrustConfig, OrganizationConfig, ParentOrganizationConfig } from '../types.js';
 /**
  * Canonical @id of the Nymrel organization node, used for attribution by
  * reference. Nymrel is the studio brand; its legal entity is expressed via
@@ -48,6 +48,10 @@ export declare function validateExplicitEntityRelationships(entity: Organization
  * Builds Schema.org JSON-LD @graph matching Dual-Audience machine trust specifications
  */
 export declare function generateJsonLd(config: MachineTrustConfig): Record<string, any>;
+/** Serializes JSON-LD for an HTML script-data context without raw markup tokens. */
+export declare function serializeJsonLdForHtml(data: unknown, options?: {
+    minify?: boolean;
+}): string;
 /**
  * Formats JSON-LD graph into an HTML <script type="application/ld+json"> tag
  */

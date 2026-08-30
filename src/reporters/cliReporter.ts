@@ -1,4 +1,4 @@
-import { MachineTrustAuditScorecard } from '../types.js';
+import type { MachineTrustAuditScorecard } from '../types.js';
 
 export function formatCliReport(scorecard: MachineTrustAuditScorecard): string {
   const lines: string[] = [];

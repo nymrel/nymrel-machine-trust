@@ -39,4 +39,33 @@ describe('Robots.txt Generator & AI Search Rules', () => {
     assert.ok(parsed.rules['OAI-SearchBot'].allow.includes('/'));
     assert.ok(parsed.rules['GPTBot'].disallow.includes('/'));
   });
+
+  test('rejects control-character directive injection', () => {
+    for (const config of [
+      { host: 'example.com\nUser-agent: *' },
+      { sitemapUrl: 'https://example.com/sitemap.xml\rDisallow: /' },
+      { botRules: [{ botName: 'SafeBot\nDisallow: /', allow: ['/'] }] },
+      { botRules: [{ botName: 'SafeBot', disallow: ['/safe\nAllow: /'] }] },
+      { defaultAllow: ['/safe\u0085Disallow: /'] },
+      { defaultDisallow: ['/safe\u2028Allow: /'] },
+    ]) {
+      assert.throws(
+        () => generateRobotsTxt(config),
+        (error) => error?.code === 'INVALID_ROBOTS_DIRECTIVE'
+      );
+    }
+  });
+
+  test('fails closed on invalid crawler delays while preserving zero', () => {
+    assert.throws(
+      () => generateRobotsTxt({ botRules: [{ botName: 'SafeBot', crawlDelay: -1 }] }),
+      (error) => error?.code === 'INVALID_ROBOTS_DIRECTIVE'
+    );
+    assert.throws(
+      () => generateRobotsTxt({ botRules: [{ botName: 'SafeBot', crawlDelay: Number.NaN }] }),
+      (error) => error?.code === 'INVALID_ROBOTS_DIRECTIVE'
+    );
+    assert.ok(generateRobotsTxt({ botRules: [{ botName: 'SafeBot', crawlDelay: 0 }] })
+      .includes('Crawl-delay: 0'));
+  });
 });

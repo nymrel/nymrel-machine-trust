@@ -102,4 +102,21 @@ describe('DOM Consistency & Parity Validator', () => {
     assert.ok(priceCheck);
     assert.strictEqual(priceCheck.status, 'FAIL');
   });
+
+  test('does not treat an unrelated long page as description parity', () => {
+    const unrelatedHtml = `
+      <main>
+        <span>Nymrel</span>
+        <h1>Autonomous Agent Kit</h1>
+        <p>$49.00</p>
+        <p>${'Completely unrelated archival material about weather and gardening. '.repeat(12)}</p>
+      </main>
+    `;
+
+    const result = verifyDomConsistency(jsonLdGraph, unrelatedHtml);
+    const descriptionCheck = result.checks.find((check) => check.field === 'Description Consistency');
+    assert.ok(descriptionCheck);
+    assert.strictEqual(descriptionCheck.status, 'WARN');
+    assert.ok(!descriptionCheck.domValue.includes('Dominant keywords'));
+  });
 });

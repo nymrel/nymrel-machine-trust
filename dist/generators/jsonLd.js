@@ -286,12 +286,27 @@ export function generateJsonLd(config) {
         '@graph': graph,
     };
 }
+/** Serializes JSON-LD for an HTML script-data context without raw markup tokens. */
+export function serializeJsonLdForHtml(data, options = {}) {
+    const serialized = options.minify ? JSON.stringify(data) : JSON.stringify(data, null, 2);
+    if (serialized === undefined) {
+        throw new TypeError('JSON-LD input must be JSON-serializable.');
+    }
+    // HTML parses script contents before JSON. Escape markup-significant code
+    // points so caller-controlled text cannot terminate the JSON-LD element.
+    return serialized
+        .replace(/</g, '\\u003C')
+        .replace(/>/g, '\\u003E')
+        .replace(/&/g, '\\u0026')
+        .replace(/\u2028/g, '\\u2028')
+        .replace(/\u2029/g, '\\u2029');
+}
 /**
  * Formats JSON-LD graph into an HTML <script type="application/ld+json"> tag
  */
 export function generateJsonLdScriptTag(config, options = {}) {
     const data = generateJsonLd(config);
-    const jsonString = options.minify ? JSON.stringify(data) : JSON.stringify(data, null, 2);
+    const jsonString = serializeJsonLdForHtml(data, options);
     return `<script type="application/ld+json">\n${jsonString}\n</script>`;
 }
 /**

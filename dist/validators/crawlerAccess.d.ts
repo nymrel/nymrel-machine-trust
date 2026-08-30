@@ -1,5 +1,5 @@
 import { parseRobotsTxt } from '../generators/robotsTxt.js';
-import { CrawlerAuditResult } from '../types.js';
+import type { CrawlerAuditResult } from '../types.js';
 /**
  * Checks if a specific path is allowed for a given bot in parsed robots.txt rules
  */

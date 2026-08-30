@@ -1,3 +1,12 @@
+import { MachineTrustConfigError } from '../errors.js';
+const SAFE_TARGET_ID = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+function parseTargetIdSelector(selector) {
+    const id = selector.startsWith('#') ? selector.slice(1) : selector;
+    if (!SAFE_TARGET_ID.test(id)) {
+        throw new MachineTrustConfigError('INVALID_TARGET_SELECTOR', 'targetSelector must be a safe HTML id or #id containing only letters, numbers, underscores, and hyphens.');
+    }
+    return id;
+}
 /**
  * Accurately counts words in a text string
  */
@@ -59,15 +68,22 @@ export function generateAnswerFirstHtml(config) {
  */
 export function injectAnswerFirstBlock(html, config) {
     const block = generateAnswerFirstHtml(config);
+    const targetId = config.targetSelector
+        ? parseTargetIdSelector(config.targetSelector)
+        : undefined;
     // 1. If explicit placeholder exists
     if (html.includes('<!-- MACHINE_TRUST_ANSWER_FIRST -->')) {
         return html.replace('<!-- MACHINE_TRUST_ANSWER_FIRST -->', block);
     }
-    // 2. If targetSelector / class / id placeholder
-    if (config.targetSelector) {
-        const selectorTag = `<div id="${config.targetSelector.replace('#', '')}">`;
-        if (html.includes(selectorTag)) {
-            return html.replace(selectorTag, `${selectorTag}\n${block}`);
+    // 2. If a safe target id was configured, inject after its opening div.
+    if (targetId) {
+        const divTags = html.matchAll(/<div\b[^>]*>/gi);
+        for (const match of divTags) {
+            const idAttribute = match[0].match(/\bid\s*=\s*(["'])(.*?)\1/i);
+            if (idAttribute?.[2] === targetId && match.index !== undefined) {
+                const insertPos = match.index + match[0].length;
+                return html.slice(0, insertPos) + '\n' + block + html.slice(insertPos);
+            }
         }
     }
     // 3. Inject after closing </h1> tag

@@ -2,6 +2,8 @@ import { test, describe } from 'node:test';
 import assert from 'node:assert';
 import {
   generateJsonLd,
+  generateJsonLdScriptTag,
+  serializeJsonLdForHtml,
   validateJsonLdStructure,
   validateNymrelLineage,
   createDefaultParentHierarchy,
@@ -79,6 +81,29 @@ describe('JSON-LD & Schema.org Graph Generator', () => {
     const validation = validateJsonLdStructure(generateJsonLd(sampleConfig));
     assert.strictEqual(validation.valid, true);
     assert.deepStrictEqual(validation.errors, []);
+  });
+
+  test('embeds caller text without allowing JSON-LD script termination', () => {
+    const hostileText = '</script><script>alert("machine-trust")</script><!--';
+    const hostileConfig = {
+      entity: {
+        name: 'Example Entity',
+        url: 'https://entity.example',
+        description: hostileText,
+      },
+    };
+
+    const tag = generateJsonLdScriptTag(hostileConfig);
+    assert.strictEqual((tag.match(/<\/script>/gi) || []).length, 1);
+    assert.ok(!tag.includes(hostileText));
+    assert.ok(!tag.includes('<!--'));
+
+    const payload = tag.slice(tag.indexOf('\n') + 1, tag.lastIndexOf('\n</script>'));
+    assert.deepStrictEqual(JSON.parse(payload), generateJsonLd(hostileConfig));
+    assert.strictEqual(
+      JSON.parse(serializeJsonLdForHtml({ text: hostileText }, { minify: true })).text,
+      hostileText
+    );
   });
 
   test('keeps an explicitly configured non-Nymrel parent relationship', () => {

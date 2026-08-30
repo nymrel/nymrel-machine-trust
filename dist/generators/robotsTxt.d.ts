@@ -1,4 +1,4 @@
-import { RobotsTxtConfig, BotRule, BotPosture } from '../types.js';
+import type { RobotsTxtConfig, BotRule, BotPosture } from '../types.js';
 export declare const KNOWN_AI_BOTS: {
     SEARCH: string[];
     TRAINING: string[];

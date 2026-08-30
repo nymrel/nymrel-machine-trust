@@ -1,5 +1,5 @@
 import { parseRobotsTxt, KNOWN_AI_BOTS } from '../generators/robotsTxt.js';
-import { CrawlerAuditResult, CrawlerAccessResult } from '../types.js';
+import type { CrawlerAuditResult, CrawlerAccessResult } from '../types.js';
 
 /**
  * Checks if a specific path is allowed for a given bot in parsed robots.txt rules

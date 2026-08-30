@@ -1,0 +1,147 @@
+---
+# yamllint disable rule:line-length
+# yamllint disable rule:truthy
+name: Build and publish package
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+concurrency:
+  group: release-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    name: Verify release candidate
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - name: Check out source and release ancestry
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Install locked dependencies without lifecycle scripts
+        run: npm ci --ignore-scripts --no-audit --no-fund
+
+      - name: Verify package version and tag identity
+        env:
+          RELEASE_REF_NAME: ${{ github.ref_name }}
+          RELEASE_REF_TYPE: ${{ github.ref_type }}
+        run: |
+          package_version="$(node -p "require('./package.json').version")"
+          if [ "$RELEASE_REF_TYPE" = "tag" ]; then
+            test "v$package_version" = "$RELEASE_REF_NAME"
+            git merge-base --is-ancestor HEAD refs/remotes/origin/main
+          fi
+
+      - name: Run the complete release gate
+        run: npm run check
+
+  build:
+    name: Build immutable distribution
+    needs: verify
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - name: Check out source
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Build the exact npm archive
+        run: |
+          npm ci --ignore-scripts --no-audit --no-fund
+          npm run build
+          mkdir -p release/npm
+          npm pack --ignore-scripts --pack-destination release/npm
+          sha256sum release/npm/* > release/SHA256SUMS
+
+      - name: Upload release distribution
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: release-distribution
+          path: release
+          if-no-files-found: error
+          retention-days: 14
+
+  attest:
+    name: Attest built distribution
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    permissions:
+      attestations: write
+      contents: read
+      id-token: write
+    steps:
+      - name: Download release distribution
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-distribution
+          path: release
+
+      - name: Generate build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8  # v4.2.2
+        with:
+          subject-path: release/**/*
+
+  publish-npm:
+    name: Publish npm through trusted publishing
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: [build, attest]
+    runs-on: ubuntu-24.04
+    timeout-minutes: 5
+    environment:
+      name: npm
+      url: https://www.npmjs.com/package/@nymrel/machine-trust
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Download release distribution
+        uses: actions/download-artifact@3e5f45b2cfb9172054b4087a40e8e0b5a5461e7c  # v8.0.1
+        with:
+          name: release-distribution
+          path: release
+
+      - name: Set up Node.js for npm trusted publishing
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version-file: .node-version
+          package-manager-cache: false
+
+      - name: Verify trusted-publishing npm CLI support
+        run: |
+          node - "$(npm --version)" <<'NODE'
+          const [major, minor, patch] = process.argv[2].split('.').map(Number);
+          if (major < 11 || (major === 11 && (minor < 5 || (minor === 5 && patch < 1)))) {
+            console.error(`npm ${process.argv[2]} cannot use trusted publishing; require >=11.5.1`);
+            process.exit(1);
+          }
+          NODE
+
+      - name: Publish the exact npm archive with provenance
+        run: |
+          mapfile -t packages < <(find release/npm -maxdepth 1 -type f -name '*.tgz' -print)
+          test "${#packages[@]}" -eq 1
+          npm publish "${packages[0]}" --access public --provenance --ignore-scripts

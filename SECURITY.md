@@ -1,10 +1,11 @@
 # Security Policy
 
-## Supported Versions
+## Supported Surfaces
 
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+| Surface | Status |
+| --- | --- |
+| `main` source branch | Actively maintained |
+| npm registry package | No publication receipt is asserted by this repository |
 
 ## Reporting a Vulnerability
 
@@ -14,9 +15,12 @@ If you discover a security vulnerability in `@nymrel/machine-trust`, please repo
 
 **`contact@nymrel.com`**
 
-Please include:
+Please include only the minimum information needed to reproduce the issue:
 - A description of the vulnerability and attack vector.
 - Reproduction steps or proof-of-concept code.
 - Impact assessment on JSON-LD integrity or crawler access policies.
 
-We aim to acknowledge reports within 24 hours and release patched versions promptly.
+Do not include credentials, private keys, customer data, or production secrets.
+Reports are reviewed on a best-effort basis; this policy does not promise a
+fixed acknowledgement, remediation, or publication timeline. Public disclosure
+should wait until a fix or coordinated disclosure plan exists.
