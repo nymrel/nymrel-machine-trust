@@ -18,19 +18,19 @@ Thank you for your interest in contributing to `@nymrel/machine-trust`.
 
 2. Install dependencies:
    ```bash
-   npm install
+   npm ci --ignore-scripts
    ```
 
-3. Run test suite:
+3. Run the complete local gate:
    ```bash
-   npm test
-   # or
-   npm run test:runner
+   npm run check
    ```
 
-4. Build TypeScript:
+4. Run narrower development commands when iterating:
    ```bash
+   npm run typecheck
    npm run build
+   npm run test:unit
    ```
 
 5. Run CLI locally:
@@ -39,6 +39,9 @@ Thank you for your interest in contributing to `@nymrel/machine-trust`.
    ```
 
 ## Code Standards
-- Strict TypeScript with ESM module resolution.
+- Node.js 24.20.0 and npm 11.19.1 are the pinned defaults; CI also verifies
+  supported Node.js 22 and 26 runtimes.
+- Strict TypeScript 7 with ESM and NodeNext module resolution.
 - 100% test pass rate before submitting PRs.
+- Fail-closed validation at every caller-controlled HTML and robots boundary.
 - Clear JSDoc comments on exported functions and types.

@@ -60,4 +60,23 @@ describe('Answer-First Executive Summary Block Generator', () => {
     assert.ok(!injected.includes('<!-- MACHINE_TRUST_ANSWER_FIRST -->'));
     assert.ok(injected.includes('<aside class="machine-trust-answer-first"'));
   });
+
+  test('injects after a safe target id even when the div has other attributes', () => {
+    const inputHtml = '<main><div class="shell" id="trust-zone" data-kind="summary"></div></main>';
+    const injected = injectAnswerFirstBlock(inputHtml, {
+      summary: summary48Words,
+      targetSelector: '#trust-zone',
+    });
+
+    assert.ok(injected.includes('data-kind="summary">\n<aside class="machine-trust-answer-first"'));
+  });
+
+  test('rejects selector syntax and attribute injection', () => {
+    for (const targetSelector of ['.content', '##trust-zone', '#bad id', '#target\" onclick=\"alert(1)']) {
+      assert.throws(
+        () => injectAnswerFirstBlock('<main></main>', { summary: summary48Words, targetSelector }),
+        (error) => error?.code === 'INVALID_TARGET_SELECTOR'
+      );
+    }
+  });
 });

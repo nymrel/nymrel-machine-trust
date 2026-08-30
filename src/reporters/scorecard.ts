@@ -1,4 +1,4 @@
-import { MachineTrustConfig, MachineTrustAuditOptions, MachineTrustAuditScorecard, CheckItem } from '../types.js';
+import type { MachineTrustConfig, MachineTrustAuditOptions, MachineTrustAuditScorecard, CheckItem } from '../types.js';
 import { generateJsonLd, validateJsonLdStructure, validateNymrelLineage } from '../generators/jsonLd.js';
 import { generateLlmsTxt, estimateTokens } from '../generators/llmsTxt.js';
 import { generateRobotsTxt } from '../generators/robotsTxt.js';

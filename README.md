@@ -1,8 +1,8 @@
 # @nymrel/machine-trust
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-blue)](https://www.typescriptlang.org/)
-[![Node](https://img.shields.io/badge/node-%E2%89%A518-green)](https://nodejs.org)
+[![TypeScript](https://img.shields.io/badge/TypeScript-7-blue)](https://www.typescriptlang.org/)
+[![Node](https://img.shields.io/badge/node-22%20%7C%2024%20%7C%2026-green)](https://nodejs.org)
 
 Your site has two audiences: the people who visit it and the automated systems that read it. `@nymrel/machine-trust` generates an inspectable machine-readable layer—Schema.org JSON-LD, `/llms.txt` indexes, and declared crawler rules—then reports observable inconsistencies between that configuration and supplied rendered HTML. It does not promise indexing, rankings, citations, recommendations, traffic, or revenue.
 
@@ -12,7 +12,7 @@ Your site has two audiences: the people who visit it and the automated systems t
 
 ```bash
 # 1. From this checkout
-npm install
+npm ci --ignore-scripts
 npm run build
 
 # 2. Create a starter config, then generate the machine-readable assets
@@ -56,7 +56,8 @@ This repository is usable from a local checkout. This README does not assert
 that an npm registry release exists; publication requires a separate release
 receipt.
 
-Requires Node.js >= 18.
+Requires Node.js 22 or newer. CI verifies Node.js 22, 24, and 26; the repository
+pins Node.js 24.20.0 and npm 11.19.1 as its default development toolchain.
 
 ## CLI
 
@@ -83,11 +84,20 @@ machine-trust audit [-c file] [--html file] [--report file]
 ### Schema.org JSON-LD generation
 
 ```typescript
-import { generateJsonLd, generateJsonLdScriptTag } from '@nymrel/machine-trust';
+import {
+  generateJsonLd,
+  generateJsonLdScriptTag,
+  serializeJsonLdForHtml,
+} from '@nymrel/machine-trust';
 
 const jsonLdGraph = generateJsonLd(config);            // raw @graph object
 const scriptTag = generateJsonLdScriptTag(config, { minify: true }); // SSR-ready <script> string
+const scriptPayload = serializeJsonLdForHtml(jsonLdGraph, { minify: true });
 ```
+
+Both HTML helpers escape markup-significant code points before JSON is placed
+in a script-data context. Do not embed caller-controlled JSON with raw
+`JSON.stringify` in HTML.
 
 When `entity.parentOrganization` is omitted, no corporate lineage is asserted.
 Legitimate caller-supplied parent relationships are kept explicit. A built or
@@ -130,6 +140,9 @@ const robotsTxt = generateRobotsTxt({
 });
 ```
 
+Directive values fail closed with `INVALID_ROBOTS_DIRECTIVE` if they contain
+control characters, invalid crawler names, or invalid crawl delays.
+
 ### Answer-first summary block
 
 ```typescript
@@ -143,6 +156,8 @@ const html = injectAnswerFirstBlock(rawHtml, {
 
 Injection order: explicit `<!-- MACHINE_TRUST_ANSWER_FIRST -->` placeholder,
 then `targetSelector`, then after `</h1>`, then after `<main>`/`<body>`.
+`targetSelector` is intentionally limited to a safe target `<div>` id
+(`trust-zone` or `#trust-zone`) and rejects general CSS or attribute syntax.
 
 ### DOM drift validation
 
@@ -170,7 +185,7 @@ fs.writeFileSync('MACHINE_TRUST_SCORECARD.md', generateMarkdownScorecard(scoreca
 ### Next.js (App Router)
 
 ```tsx
-import { generateJsonLd } from '@nymrel/machine-trust';
+import { generateJsonLd, serializeJsonLdForHtml } from '@nymrel/machine-trust';
 import { machineTrustConfig } from '@/config/machine-trust';
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -182,7 +197,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
         <script
           type="application/ld+json"
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          dangerouslySetInnerHTML={{ __html: serializeJsonLdForHtml(jsonLd) }}
         />
       </body>
     </html>
@@ -194,7 +209,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
 ```astro
 ---
-import { generateJsonLd } from '@nymrel/machine-trust';
+import { generateJsonLd, serializeJsonLdForHtml } from '@nymrel/machine-trust';
 import { siteConfig } from '../site.config';
 
 const jsonLd = generateJsonLd(siteConfig);
@@ -202,7 +217,7 @@ const jsonLd = generateJsonLd(siteConfig);
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <script type="application/ld+json" set:html={JSON.stringify(jsonLd)} />
+    <script type="application/ld+json" set:html={serializeJsonLdForHtml(jsonLd)} />
   </head>
   <body>
     <slot />
@@ -222,10 +237,10 @@ service, not a ranking or traffic promise. See
 ## Development
 
 ```bash
-npm install       # development dependencies are declared in package.json
-npm run build     # tsc -> dist/
-npm test          # node:test suite via test/runner.js
-npm run lint      # tsc --noEmit
+npm ci --ignore-scripts  # exact dependency graph from package-lock.json
+npm run typecheck        # TypeScript 7 native compiler, no output
+npm test                 # clean build plus node:test suite
+npm run check            # typecheck, tests, audit, and package-boundary check
 ```
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md) for principles and workflow.

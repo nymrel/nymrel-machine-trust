@@ -5,8 +5,16 @@
   "type": "module",
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "default": "./dist/index.js"
+    }
+  },
+  "sideEffects": false,
   "bin": {
-    "machine-trust": "./bin/machine-trust.js"
+    "machine-trust": "bin/machine-trust.js"
   },
   "files": [
     "dist",
@@ -17,11 +25,17 @@
     "llms.txt"
   ],
   "scripts": {
-    "build": "tsc",
-    "test": "node test/runner.js",
-    "test:runner": "node test/runner.js",
-    "lint": "tsc --noEmit",
-    "prepublishOnly": "npm run build && npm test"
+    "clean": "node --input-type=module -e \"import { rmSync } from 'node:fs'; rmSync('dist', { recursive: true, force: true })\"",
+    "typecheck": "tsc --noEmit --pretty false",
+    "lint": "npm run typecheck",
+    "build": "npm run clean && tsc --pretty false",
+    "test:unit": "node --test test/runner.js",
+    "test:runner": "npm run test:unit",
+    "test": "npm run build && npm run test:unit",
+    "audit:ci": "npm audit --audit-level=high",
+    "package:check": "npm pack --dry-run --ignore-scripts",
+    "check": "npm run typecheck && npm test && npm run audit:ci && npm run package:check",
+    "prepublishOnly": "npm run check"
   },
   "keywords": [
     "seo",
@@ -38,12 +52,21 @@
   ],
   "author": "Nymrel <contact@nymrel.com>",
   "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nymrel/nymrel-machine-trust.git"
   },
+  "bugs": {
+    "url": "https://github.com/nymrel/nymrel-machine-trust/issues"
+  },
+  "homepage": "https://github.com/nymrel/nymrel-machine-trust#readme",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "packageManager": "npm@11.19.1",
   "devDependencies": {
-    "@types/node": "^20.11.0",
-    "typescript": "^5.3.3"
+    "@types/node": "22.20.1",
+    "typescript": "7.0.2"
   },
   "publishConfig": {
     "access": "public"

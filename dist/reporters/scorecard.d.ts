@@ -1,4 +1,4 @@
-import { MachineTrustConfig, MachineTrustAuditOptions, MachineTrustAuditScorecard } from '../types.js';
+import type { MachineTrustConfig, MachineTrustAuditOptions, MachineTrustAuditScorecard } from '../types.js';
 /**
  * Resolves the timestamp recorded on an audit scorecard.
  *

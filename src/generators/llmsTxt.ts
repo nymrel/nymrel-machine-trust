@@ -1,4 +1,4 @@
-import { LlmsTxtConfig, LlmsSection, LlmsLink } from '../types.js';
+import type { LlmsTxtConfig, LlmsSection, LlmsLink } from '../types.js';
 
 /**
  * Estimates token count using standard GPT/LLM heuristic (~4 characters per token or 0.75 words)

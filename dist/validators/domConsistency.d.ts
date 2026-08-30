@@ -1,4 +1,4 @@
-import { DomConsistencyCheckResult } from '../types.js';
+import type { DomConsistencyCheckResult } from '../types.js';
 /**
  * Strips HTML tags and normalizes whitespace
  */

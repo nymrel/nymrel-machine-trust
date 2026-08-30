@@ -1,4 +1,4 @@
-import { AnswerFirstConfig } from '../types.js';
+import type { AnswerFirstConfig } from '../types.js';
 /**
  * Accurately counts words in a text string
  */

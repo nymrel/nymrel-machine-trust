@@ -1,4 +1,4 @@
-import { DomConsistencyCheckResult } from '../types.js';
+import type { DomConsistencyCheckResult } from '../types.js';
 
 /**
  * Strips HTML tags and normalizes whitespace
@@ -40,6 +40,18 @@ export function normalizeText(text: string): string {
 export function extractPrices(text: string): string[] {
   const matches = text.match(/(?:\$|€|£|USD\s*|EUR\s*|GBP\s*)?\b\d+(?:\.\d{2})?\b|\bfree\b/gi) || [];
   return matches.map((m) => m.toLowerCase().trim());
+}
+
+const DESCRIPTION_STOP_WORDS = new Set([
+  'and', 'are', 'for', 'from', 'into', 'that', 'the', 'this', 'with', 'your',
+]);
+
+function significantTerms(text: string): Set<string> {
+  const terms = normalizeText(text)
+    .split(/\s+/)
+    .map((term) => term.replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, ''))
+    .filter((term) => term.length >= 3 && !DESCRIPTION_STOP_WORDS.has(term));
+  return new Set(terms);
 }
 
 /**
@@ -162,27 +174,34 @@ export function verifyDomConsistency(jsonLd: any, html: string): DomConsistencyC
   // 4. Check Description Substring / Key Entities
   if (prod && prod.description) {
     totalWeight += 15;
-    // Extract key words / sentences
-    const descWords = prod.description.split(/\s+/).slice(0, 8).join(' ');
-    const normalizedDescChunk = normalizeText(descWords);
-    const foundChunk = normalizedDom.includes(normalizedDescChunk);
+    const descriptionTerms = significantTerms(prod.description);
+    const domTerms = significantTerms(visibleText);
+    const matchingTerms = [...descriptionTerms].filter((term) => domTerms.has(term));
+    const overlap = descriptionTerms.size > 0
+      ? matchingTerms.length / descriptionTerms.size
+      : 0;
+    const minimumMatches = Math.min(3, descriptionTerms.size);
+    const hasMeaningfulOverlap =
+      descriptionTerms.size > 0 &&
+      matchingTerms.length >= minimumMatches &&
+      overlap >= 0.6;
 
-    if (foundChunk || normalizedDom.length > 200) {
+    if (hasMeaningfulOverlap) {
       passedScore += 15;
       checks.push({
         field: 'Description Consistency',
         jsonLdValue: `${prod.description.slice(0, 60)}...`,
-        domValue: `Dominant keywords verified`,
+        domValue: `${matchingTerms.length}/${descriptionTerms.size} significant terms found`,
         status: 'PASS',
-        message: 'Product description aligns with visible page narrative.',
+        message: `Product description has ${Math.round(overlap * 100)}% significant-term overlap with visible DOM text.`,
       });
     } else {
       checks.push({
         field: 'Description Consistency',
         jsonLdValue: `${prod.description.slice(0, 60)}...`,
-        domValue: `DOM text snippet: "${visibleText.slice(0, 80)}..."`,
+        domValue: `${matchingTerms.length}/${descriptionTerms.size} significant terms found`,
         status: 'WARN',
-        message: 'Product description text has low direct overlap with DOM text.',
+        message: 'Product description has insufficient direct overlap with visible DOM text.',
       });
     }
   }
