@@ -27,9 +27,10 @@ export function extractTextFromHtml(html: string): string {
 export function normalizeText(text: string): string {
   if (!text) return '';
   return text
+    .normalize('NFKC')
     .toLowerCase()
     .replace(/[\r\n\t]+/g, ' ')
-    .replace(/[^\w\s$€£¥.-]/g, ' ')
+    .replace(/[^\p{L}\p{N}\s$€£¥._-]/gu, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
@@ -49,7 +50,7 @@ const DESCRIPTION_STOP_WORDS = new Set([
 function significantTerms(text: string): Set<string> {
   const terms = normalizeText(text)
     .split(/\s+/)
-    .map((term) => term.replace(/^[^a-z0-9]+|[^a-z0-9]+$/g, ''))
+    .map((term) => term.replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, ''))
     .filter((term) => term.length >= 3 && !DESCRIPTION_STOP_WORDS.has(term));
   return new Set(terms);
 }
