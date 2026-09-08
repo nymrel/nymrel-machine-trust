@@ -119,4 +119,45 @@ describe('DOM Consistency & Parity Validator', () => {
     assert.strictEqual(descriptionCheck.status, 'WARN');
     assert.ok(!descriptionCheck.domValue.includes('Dominant keywords'));
   });
+
+  test('preserves Unicode letters and matches multilingual entity names', () => {
+    const multilingualGraph = {
+      '@graph': [
+        { '@type': 'Organization', name: '東京会社' },
+        { '@type': 'Product', name: 'مساعد ذكي' },
+      ],
+    };
+
+    assert.strictEqual(normalizeText('東京会社'), '東京会社');
+    assert.strictEqual(normalizeText('ＭＡＣＨＩＮＥ Trust'), 'machine trust');
+
+    const result = verifyDomConsistency(
+      multilingualGraph,
+      '<main><p>東京会社</p><h1>مساعد ذكي</h1></main>'
+    );
+
+    assert.strictEqual(result.consistent, true);
+    assert.ok(result.checks.every((check) => check.status === 'PASS'));
+  });
+
+  test('does not let empty ASCII normalization make unrelated multilingual names pass', () => {
+    const multilingualGraph = {
+      '@graph': [
+        { '@type': 'Organization', name: '東京会社' },
+        { '@type': 'Product', name: 'مساعد ذكي' },
+      ],
+    };
+
+    const result = verifyDomConsistency(
+      multilingualGraph,
+      '<main><p>Completely unrelated rendered content.</p></main>'
+    );
+
+    assert.strictEqual(result.consistent, false);
+    assert.strictEqual(result.score, 0);
+    assert.deepStrictEqual(
+      result.checks.map((check) => check.status),
+      ['FAIL', 'FAIL']
+    );
+  });
 });
