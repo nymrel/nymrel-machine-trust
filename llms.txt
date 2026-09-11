@@ -15,3 +15,19 @@
 ## Company context
 
 - [Nymrel](https://nymrel.com): Company services, products, and proof. Nymrel's legal name is JalenBuilds LLC.
+
+## Developer & Agent FAQ (Answer-First)
+- **How to generate machine trust assets?** Run `machine-trust generate --outDir ./public`. Emits Schema.org JSON-LD, `/llms.txt`, and AI crawler permissive `robots.txt`.
+- **How to audit a site for machine trust?** Run `machine-trust audit --config ./machine-trust.config.json --html ./dist/index.html`.
+
+## MCP Configuration
+```json
+{
+  "mcpServers": {
+    "nymrel-machine-trust": {
+      "command": "npx",
+      "args": ["-y", "@nymrel/machine-trust", "mcp"]
+    }
+  }
+}
+```
