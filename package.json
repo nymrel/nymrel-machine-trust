@@ -38,18 +38,19 @@
     "prepublishOnly": "npm run check"
   },
   "keywords": [
+    "seo",
     "machine-trust",
+    "llms-txt",
     "llms-txt-generator",
     "schema-org",
     "json-ld",
     "ai-search-optimization",
+    "ai-search",
     "geo",
     "oai-searchbot",
     "dual-audience",
     "robots-txt",
     "answer-first",
-    "ai-search",
-    "mcp",
     "nymrel",
     "jalenbuilds"
   ],
