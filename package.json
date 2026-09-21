@@ -38,17 +38,20 @@
     "prepublishOnly": "npm run check"
   },
   "keywords": [
-    "seo",
     "machine-trust",
-    "dual-audience",
-    "json-ld",
+    "llms-txt-generator",
     "schema-org",
-    "llms-txt",
-    "robots-txt",
-    "ai-search",
+    "json-ld",
+    "ai-search-optimization",
+    "geo",
     "oai-searchbot",
+    "dual-audience",
+    "robots-txt",
     "answer-first",
-    "nymrel"
+    "ai-search",
+    "mcp",
+    "nymrel",
+    "jalenbuilds"
   ],
   "author": "Nymrel <contact@nymrel.com>",
   "license": "MIT",
