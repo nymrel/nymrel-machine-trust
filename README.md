@@ -18,23 +18,6 @@ Your site has two audiences: the people who visit it and the automated systems t
 
 ---
 
-## 🔌 Model Context Protocol (MCP) & Agentic Setup
-
-For autonomous agents in Claude Desktop, Cursor, or Windsurf:
-
-```json
-{
-  "mcpServers": {
-    "nymrel-machine-trust": {
-      "command": "npx",
-      "args": ["-y", "@nymrel/machine-trust", "mcp"]
-    }
-  }
-}
-```
-
----
-
 ## 60-second quickstart
 
 ```bash
