@@ -69,7 +69,7 @@
   },
   "packageManager": "npm@11.19.1",
   "devDependencies": {
-    "@types/node": "26.5.0",
+    "@types/node": "26.6.3",
     "typescript": "7.0.2"
   },
   "publishConfig": {
