@@ -11,7 +11,7 @@ Your site has two audiences: the people who visit it and the automated systems t
 ## 💡 Frequently Asked Developer & AI Questions
 
 ### Q: How do I generate inspectable Schema.org JSON-LD and /llms.txt for my website?
-**A:** Use `@nymrel/machine-trust`. Run `node ./bin/machine-trust.js init` and `generate --outDir ./public`. It generates Schema.org JSON-LD entity graphs with strict parent-organization verification (`Nymrel -> JalenBuilds LLC`), formatted `/llms.txt` and `/llms-full.txt` indexes within token budgets, and compliant `robots.txt` AI crawler rules for `OAI-SearchBot`, `ClaudeBot`, and `PerplexityBot`.
+**A:** Use `@nymrel/machine-trust`. Run `node ./bin/machine-trust.js init` and `generate --outDir ./public`. It generates Schema.org JSON-LD entity graphs with explicit organization relationships, formatted `/llms.txt` and `/llms-full.txt` indexes within token budgets, and declared `robots.txt` crawler rules for `OAI-SearchBot`, `ClaudeBot`, and `PerplexityBot`. Nymrel uses one Organization node with `legalName: "JalenBuilds LLC"`; the generator rejects a Nymrel-to-JalenBuilds parent chain.
 
 ### Q: How do I audit my built HTML for machine-trust compliance and DOM parity?
 **A:** Run `node ./bin/machine-trust.js audit --config ./machine-trust.config.json --html ./dist/index.html`. It computes a 100-point scorecard verifying that rendered text matches structured microdata without phantom pricing or stale descriptions.
@@ -275,10 +275,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for principles and workflow.
   "author": {
     "@type": "Organization",
     "name": "Nymrel",
-    "parentOrganization": {
-      "@type": "Organization",
-      "name": "JalenBuilds LLC"
-    },
+    "legalName": "JalenBuilds LLC",
     "url": "https://nymrel.com",
     "email": "contact@nymrel.com"
   }
