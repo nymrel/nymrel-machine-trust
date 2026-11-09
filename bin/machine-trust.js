@@ -53,6 +53,7 @@ Dual-Audience Machine Trust & AI Search Discoverability Engine
                              current time; identical runs become byte-identical. Also settable
                              via MACHINE_TRUST_FIXED_TIMESTAMP (flag takes precedence).
   --force                    Allow init to replace an existing target file
+  --json                     Print only the scorecard JSON on stdout for validate / audit
   -v, --version              Show version
 
 \x1b[1mEXAMPLES:\x1b[0m
@@ -247,14 +248,18 @@ async function main() {
     }
 
     const scorecard = engine.runMachineTrustAudit(config, sampleHtml, { fixedTimestamp });
-    console.log(engine.formatCliReport(scorecard));
+    const asJson = args.includes('--json');
 
     if (command === 'audit') {
       const mdReport = engine.generateMarkdownScorecard(scorecard);
       const fullReportPath = path.resolve(process.cwd(), reportPath);
       fs.writeFileSync(fullReportPath, mdReport, 'utf8');
-      console.log(`\x1b[32m[✓] Saved Markdown Scorecard: ${path.relative(process.cwd(), fullReportPath)}\x1b[0m\n`);
+      if (!asJson) {
+        console.log(`\x1b[32m[✓] Saved Markdown Scorecard: ${path.relative(process.cwd(), fullReportPath)}\x1b[0m\n`);
+      }
     }
+
+    console.log(asJson ? JSON.stringify(scorecard, null, 2) : engine.formatCliReport(scorecard));
 
     if (scorecard.failCount > 0) {
       process.exit(1);
