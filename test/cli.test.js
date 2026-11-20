@@ -159,14 +159,31 @@ describe('CLI smoke tests', () => {
       '--html', './index.html',
       '--report', './SECOND_SCORECARD.md',
       '--fixed-timestamp', fixedTimestamp,
+      '--json',
     ], { cwd: sandbox, encoding: 'utf8' });
 
     assert.strictEqual(second.status, 0);
+    const structured = JSON.parse(second.stdout);
+    assert.strictEqual(structured.failCount, 0);
+    assert.strictEqual(structured.timestamp, fixedTimestamp);
+    assert.doesNotMatch(second.stdout, /\x1b|Saved Markdown/);
     assert.strictEqual(
       fs.readFileSync(path.join(sandbox, 'SECOND_SCORECARD.md'), 'utf8'),
       report,
       'fixed-time audit output must be byte-identical across runs'
     );
+  });
+
+  test('JSON validation preserves failed findings and a nonzero exit without writing a report', (t) => {
+    const sandbox = makeTempCwd(t);
+    fs.copyFileSync(path.join(repoRoot, 'sample-config.json'), path.join(sandbox, 'config.json'));
+    const result = spawnSync(process.execPath, [
+      binPath, 'validate', '--config', './config.json', '--json',
+    ], { cwd: sandbox, encoding: 'utf8' });
+    const scorecard = JSON.parse(result.stdout);
+    assert.strictEqual(result.status, scorecard.failCount > 0 ? 1 : 0);
+    assert.ok(Array.isArray(scorecard.checks));
+    assert.deepStrictEqual(fs.readdirSync(sandbox), ['config.json']);
   });
 
   test('audit fails closed on an invalid fixed timestamp', (t) => {

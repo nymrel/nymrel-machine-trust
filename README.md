@@ -8,6 +8,22 @@ Your site has two audiences: the people who visit it and the automated systems t
 
 ---
 
+## Choose your next step
+
+- **Review a report without coding:** open the fictional [Halcyon Coffee specimen](specimens/halcyon-coffee/README.md). Read each finding beside the supplied page and ask your site maintainer to correct verified mismatches. The report is a diagnostic, not a ranking or certification.
+- **Integrate as a developer:** start with [examples/minimal-site](examples/minimal-site/README.md), then audit your built HTML. Keep generated files in a candidate output directory until you review their facts and crawler policy.
+- **Use an agent or CI:** append `--json` to `validate` or `audit`. Stdout contains a single scorecard object; stderr carries input failures. Inspect `checks`, `failCount`, and `warnCount`; exit `1` can mean findings or invalid input, so retain stderr too. `audit` also writes its Markdown report; `validate` does not.
+
+For example, after building this checkout:
+
+```bash
+node bin/machine-trust.js validate --config examples/minimal-site/machine-trust.config.json --html examples/minimal-site/index.html --json
+```
+
+These are local source interfaces, with no hosted API or MCP endpoint supplied
+by this repository. Agents use the same verified business facts and owner
+permissions as people; generation does not authorize publication.
+
 ## 💡 Frequently Asked Developer & AI Questions
 
 ### Q: How do I generate inspectable Schema.org JSON-LD and /llms.txt for my website?
